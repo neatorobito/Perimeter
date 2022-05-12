@@ -111,7 +111,7 @@ public class PerimeterPlugin extends Plugin{
         {
             call.reject("This method requires foreground permissions with " +
                     "ACCESS_COARSE_LOCATION permissions first." +
-                    " Ensure you've called Perimeter.requestPermissions before calling this method.");
+                    " Ensure you've called Perimeter.requestForegroundPermissions before calling this method.");
             return;
         }
 
