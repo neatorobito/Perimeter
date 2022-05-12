@@ -159,14 +159,14 @@ public class PerimeterPlugin extends Plugin{
             call.reject(Constants.CLIENT_UNINITIALIZED);
             return;
         }
-        else if(!call.hasOption("fenceName") &&
-                !call.hasOption("fenceId") &&
+        else if(!call.hasOption("name") &&
+                !call.hasOption("uid") &&
                 !call.hasOption("interests") &&
                 !call.hasOption("lat") &&
                 !call.hasOption("lng") &&
                 !call.hasOption("radius") &&
                 !call.hasOption("expires") &&
-                !call.hasOption("transitionType"))
+                !call.hasOption("monitor"))
         {
             call.reject("Please provide a valid fence object to create a new fence.");
             return;
@@ -174,10 +174,10 @@ public class PerimeterPlugin extends Plugin{
 
         Log.d(Constants.PERIMETER_TAG, call.getData().toString());
 
-        Constants.TRANSITION_TYPE preferredTransitionType = Constants.TRANSITION_TYPE.values()[call.getInt("transitionType")];
+        Constants.TRANSITION_TYPE preferredTransitionType = Constants.TRANSITION_TYPE.values()[call.getInt("monitor")];
 
         Geofence newFence = buildNewFence(
-                call.getString("fenceId"),
+                call.getString("uid"),
                 call.getString("interests"),
                 call.getDouble("lat"),
                 call.getDouble("lng"),
@@ -209,18 +209,18 @@ public class PerimeterPlugin extends Plugin{
             call.reject(Constants.CLIENT_UNINITIALIZED);
             return;
         }
-        else if(!call.hasOption("fenceId"))
+        else if(!call.hasOption("fenceUID"))
         {
             call.reject("Please provide the id of a fence to remove.");
             return;
         }
 
-        String fenceId = call.getString("fenceId");
+        String fenceUID = call.getString("fenceUID");
         boolean foundInActive = false;
 
-        for(JSObject activeFence : activeFences)
+        for(JSObject fence : activeFences)
         {
-            if(fenceId.equals(activeFence.getString("fenceId")))
+            if(fenceUID.equals(fence.getString("uid")))
             {
                 foundInActive = true;
             }
@@ -234,11 +234,11 @@ public class PerimeterPlugin extends Plugin{
         else
         {
             ArrayList<String> fenceToRemove = new ArrayList<>();
-            fenceToRemove.add(fenceId);
+            fenceToRemove.add(fenceUID);
 
             geofencingClient.removeGeofences(fenceToRemove);
             call.resolve();
-            Log.d(Constants.PERIMETER_TAG, "Successfully removed fence " + fenceId + ".");
+            Log.d(Constants.PERIMETER_TAG, "Successfully removed fence " + fenceUID + ".");
         }
     }
 
@@ -262,14 +262,14 @@ public class PerimeterPlugin extends Plugin{
             return;
         }
 
-        ArrayList<String> activeFenceIds = new ArrayList<>();
+        ArrayList<String> activeFenceUIDs = new ArrayList<>();
 
         for(JSObject fence : activeFences)
         {
-            activeFenceIds.add(fence.getString("fenceId"));
+            activeFenceUIDs.add(fence.getString("uid"));
         }
 
-        geofencingClient.removeGeofences(activeFenceIds);
+        geofencingClient.removeGeofences(activeFenceUIDs);
         activeFences.clear();
         call.resolve();
         Log.d(Constants.PERIMETER_TAG, "Successfully removed all fences.");

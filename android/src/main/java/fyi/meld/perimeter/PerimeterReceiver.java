@@ -62,11 +62,11 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
                     {
                         JSObject jsonFence = JSObject.fromJSONObject((JSONObject) fencesActiveWhileAdded.get(i));
 
-                        if(jsonFence.getString("fenceId").equals(triggeredFences.get(k).getRequestId()))
+                        if(jsonFence.getString("uid").equals(triggeredFences.get(k).getRequestId()))
                         {
-                            jsonFence.put("triggerTime", triggeringTime);
-                            jsonFence.put("transitionType", transitionType);
-                            triggeredJSObj.add(jsonFence);
+                            triggeredJSObj.put("fence", jsonFence);
+                            triggeredJSObj.put("time", triggeringTime);
+                            triggeredJSObj.put("transition", transitionType);
                             Log.d(Constants.PERIMETER_TAG, "Fence event was successfully triggered for " + triggeredFences.get(k).getRequestId() + ".");
                         }
                     }

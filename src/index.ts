@@ -7,5 +7,5 @@ const Perimeter = registerPlugin<PerimeterPlugin>('Perimeter', {
   web: () => import('./web').then(m => new m.PerimeterWeb()),
 });
 
-export * from './definitions';
+export { Fence, FenceEvent, LocationPermissionStatus, TransitionType } from './definitions';
 export { Perimeter };

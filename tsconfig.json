@@ -13,7 +13,8 @@
     "pretty": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2017",
+    "preserveConstEnums": true
   },
   "files": ["src/index.ts"]
 }

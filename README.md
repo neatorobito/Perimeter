@@ -20,9 +20,6 @@ npx cap sync
 * [`addFence(...)`](#addfence)
 * [`removeFence(...)`](#removefence)
 * [`removeAllFences()`](#removeallfences)
-* [Interfaces](#interfaces)
-* [Type Aliases](#type-aliases)
-* [Enums](#enums)
 
 </docgen-index>
 
@@ -32,10 +29,10 @@ npx cap sync
 ### checkPermissions()
 
 ```typescript
-checkPermissions() => Promise<PermissionStatus>
+checkPermissions() => Promise<LocationPermissionStatus>
 ```
 
-**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+**Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
 --------------------
 
@@ -43,10 +40,10 @@ checkPermissions() => Promise<PermissionStatus>
 ### requestPermissions()
 
 ```typescript
-requestPermissions() => Promise<PermissionStatus>
+requestPermissions() => Promise<LocationPermissionStatus>
 ```
 
-**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+**Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
 --------------------
 
@@ -54,10 +51,10 @@ requestPermissions() => Promise<PermissionStatus>
 ### requestForegroundPermissions()
 
 ```typescript
-requestForegroundPermissions() => Promise<PermissionStatus>
+requestForegroundPermissions() => Promise<LocationPermissionStatus>
 ```
 
-**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+**Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
 --------------------
 
@@ -65,10 +62,10 @@ requestForegroundPermissions() => Promise<PermissionStatus>
 ### requestBackgroundPermissions()
 
 ```typescript
-requestBackgroundPermissions() => Promise<PermissionStatus>
+requestBackgroundPermissions() => Promise<LocationPermissionStatus>
 ```
 
-**Returns:** <code>Promise&lt;<a href="#permissionstatus">PermissionStatus</a>&gt;</code>
+**Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
 --------------------
 
@@ -79,9 +76,9 @@ requestBackgroundPermissions() => Promise<PermissionStatus>
 addFence(newFence: Fence) => Promise<void>
 ```
 
-| Param          | Type                                    |
-| -------------- | --------------------------------------- |
-| **`newFence`** | <code><a href="#fence">Fence</a></code> |
+| Param          | Type               |
+| -------------- | ------------------ |
+| **`newFence`** | <code>Fence</code> |
 
 --------------------
 
@@ -89,12 +86,12 @@ addFence(newFence: Fence) => Promise<void>
 ### removeFence(...)
 
 ```typescript
-removeFence(options: { fenceId: string; }) => void
+removeFence(options: { fenceUID: string; }) => void
 ```
 
-| Param         | Type                              |
-| ------------- | --------------------------------- |
-| **`options`** | <code>{ fenceId: string; }</code> |
+| Param         | Type                               |
+| ------------- | ---------------------------------- |
+| **`options`** | <code>{ fenceUID: string; }</code> |
 
 --------------------
 
@@ -106,50 +103,5 @@ removeAllFences() => void
 ```
 
 --------------------
-
-
-### Interfaces
-
-
-#### PermissionStatus
-
-| Prop             | Type                                                        |
-| ---------------- | ----------------------------------------------------------- |
-| **`foreground`** | <code><a href="#permissionstate">PermissionState</a></code> |
-| **`background`** | <code><a href="#permissionstate">PermissionState</a></code> |
-
-
-#### Fence
-
-| Prop                 | Type                                                      |
-| -------------------- | --------------------------------------------------------- |
-| **`fenceName`**      | <code>string</code>                                       |
-| **`fenceId`**        | <code>string</code>                                       |
-| **`interests`**      | <code>string</code>                                       |
-| **`lat`**            | <code>number</code>                                       |
-| **`lng`**            | <code>number</code>                                       |
-| **`radius`**         | <code>number</code>                                       |
-| **`expires`**        | <code>number</code>                                       |
-| **`transitionType`** | <code><a href="#transitiontype">TransitionType</a></code> |
-
-
-### Type Aliases
-
-
-#### PermissionState
-
-<code>'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'</code>
-
-
-### Enums
-
-
-#### TransitionType
-
-| Members     |
-| ----------- |
-| **`Enter`** |
-| **`Exit`**  |
-| **`Both`**  |
 
 </docgen-api>

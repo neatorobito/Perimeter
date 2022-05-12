@@ -14,9 +14,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     struct PerimeterFence
     {
         let region : CLCircularRegion
-        let name : String
-        let id : String
-        let interests : String
+        let data : Dictionary<AnyHashable, Any>
     }
     
     let locationManager = CLLocationManager()
@@ -102,16 +100,16 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             call.reject("This device does not support region monitoring.");
             return
         }
-        else if(!(call.hasOption("fenceName") &&
-            call.hasOption("fenceId") &&
+        else if(!(call.hasOption("name") &&
+            call.hasOption("uid") &&
             call.hasOption("interests") &&
             call.hasOption("lat") &&
             call.hasOption("lng") &&
             call.hasOption("radius") &&
             call.hasOption("expires") &&
-            call.hasOption("transitionType"))) {
+            call.hasOption("monitor"))) {
             
-            call.reject("Please provide a valid fence object to create a new fence.");
+            call.reject("Please provide a valid fence object.");
             return
         }
         else if(lastStatus != .authorizedAlways)
@@ -123,9 +121,9 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         let newRegion = CLCircularRegion(
              center: CLLocationCoordinate2DMake(call.getDouble("lat")!, call.getDouble("lng")!),
              radius: call.getDouble("radius")!,
-             identifier: call.getString("fenceId")!)
+             identifier: call.getString("uid")!)
                 
-        let transitionType = Constants.Perimeter.TransitionType(rawValue: call.getInt("transitionType")!)
+        let transitionType = Constants.Perimeter.TransitionType(rawValue: call.getInt("monitor")!)
 
         newRegion.notifyOnEntry = (transitionType == Constants.Perimeter.TransitionType.Enter ||
                                 transitionType == Constants.Perimeter.TransitionType.Both) ? true : false;
@@ -135,9 +133,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
 
         let newFlockFence = PerimeterFence(
             region: newRegion,
-            name : call.getString("fenceName")!,
-            id : call.getString("fenceId")!,
-            interests : call.getString("interests")!
+            data: call.options!
         )
         
         activeFences.append(newFlockFence)
@@ -148,9 +144,9 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     
     @objc func removeFence(_ call: CAPPluginCall ) {
         
-        if(call.getString("fenceId") == nil)
+        if(call.getString("fenceUID") == nil)
         {
-            call.reject("Please provide the id of a fence to remove.");
+            call.reject("Please provide the identifier of a fence to remove.");
             return
         }
         else if (!CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self)) {
@@ -170,8 +166,8 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             return
         }
         
-        let toRemoveId = call.getString("fenceId")!
-        let (foundFenceIndex, foundFence) = getFenceById(fenceId: toRemoveId)
+        let toRemoveId = call.getString("fenceUID")!
+        let (foundFenceIndex, foundFence) = getFenceByUID(uid: toRemoveId)
         
         if(foundFenceIndex >= 0)
         {
@@ -187,17 +183,17 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     }
     
     @objc func removeAllFences(_ call: CAPPluginCall ) {
-        call.resolve()
-        print("Successfully did the thing.")
+        call.resolve([:])
+        print("Successfully removed all fences.")
     }
     
-    func getFenceById(fenceId : String) -> (Int, PerimeterFence?)
+    func getFenceByUID(uid : String) -> (Int, PerimeterFence?)
     {
         var foundFence : PerimeterFence?
         var foundFenceIndex = -1
         
         for (index, fence) in activeFences.enumerated() {
-            if(fence.id == fenceId)
+            if(fence.data["uid"] as! String == uid)
             {
                 foundFence = fence
                 foundFenceIndex = index
@@ -218,20 +214,18 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         
     func handleFenceEvent(triggeredRegion : CLCircularRegion, eventType : Constants.Perimeter.TransitionType)
     {
-        let (resolvedFenceIndex, resolvedFence) = getFenceById(fenceId: triggeredRegion.identifier)
+        let (resolvedFenceIndex, resolvedFence) = getFenceByUID(uid: triggeredRegion.identifier)
         let triggerTime = NSDate().timeIntervalSince1970
         
         if(resolvedFenceIndex >= 0)
         {
-            print("Fence event triggered for " + resolvedFence!.id);
+            print("Fence event triggered for " + triggeredRegion.identifier);
             
-            let fenceDict = ["fenceName": resolvedFence!.name,
-                             "fenceId" : resolvedFence!.id,
-                             "interests" : resolvedFence!.interests,
+            let fenceEventDict = ["fence": resolvedFence!.data,
                              "transitionType" : eventType.rawValue,
                              "triggerTime" : triggerTime] as [String : Any]
             
-            bridge?.triggerWindowJSEvent(eventName: "fenceEvent", data: getJSONString(from: fenceDict)!)
+            bridge?.triggerWindowJSEvent(eventName: "FenceEvent", data: getJSONString(from: fenceEventDict)!)
         }
         else
         {
