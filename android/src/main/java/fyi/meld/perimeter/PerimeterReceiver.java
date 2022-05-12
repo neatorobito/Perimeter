@@ -28,9 +28,9 @@ import java.util.List;
 
 public abstract class PerimeterReceiver extends BroadcastReceiver {
 
-    public abstract void onEntrance(ArrayList<JSObject> triggeredJSFences, long triggerTime);
-    public abstract void onExit(ArrayList<JSObject> triggeredJSFences, long triggerTime);
-    public abstract void onError(int errorCode,String errorMessage);
+    public abstract void onEntrance(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime);
+    public abstract void onExit(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime);
+    public abstract void onError(Context context, int errorCode,String errorMessage);
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -41,7 +41,7 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
             int errorCode = geofencingEvent.getErrorCode();
             String errorMessage = GoogleApiAvailabilityLight.getInstance().getErrorString(errorCode);
             Log.e(Constants.PERIMETER_TAG, "There was an error while processing a fence trigger event. Error details: " +  errorMessage);
-            onError(errorCode, errorMessage);
+            onError(context, errorCode, errorMessage);
             return;
         }
 
@@ -80,10 +80,10 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
             switch(transitionType)
             {
                 case Geofence.GEOFENCE_TRANSITION_ENTER:
-                    onEntrance(triggeredJSObj, triggeringTime);
+                    onEntrance(context, triggeredJSObj, triggeringTime);
                     break;
                 case Geofence.GEOFENCE_TRANSITION_EXIT:
-                    onExit(triggeredJSObj, triggeringTime);
+                    onExit(context, triggeredJSObj, triggeringTime);
                     break;
                 default:
                     break;

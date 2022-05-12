@@ -34,6 +34,7 @@ import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -172,6 +173,15 @@ public class PerimeterPlugin extends Plugin{
             return;
         }
 
+        for (JSONObject fence : activeFences) {
+            if((fence.optString("uid").equals(call.getString("uid")) ||
+                    fence.optDouble("lat") == call.getDouble("lat") ||
+                    fence.optDouble("lng") == call.getDouble("lng"))) {
+                    call.reject("A region with the specified UID or coordinates is already fenced.");
+                    return;
+            }
+        }
+
         Log.d(Constants.PERIMETER_TAG, call.getData().toString());
 
         Constants.TRANSITION_TYPE preferredTransitionType = Constants.TRANSITION_TYPE.values()[call.getInt("monitor")];
@@ -193,7 +203,6 @@ public class PerimeterPlugin extends Plugin{
         geofencingClient.addGeofences(getGeoFencingRequest(fenceToAdd), getFencePendingIntent())
                 .addOnSuccessListener(v -> call.resolve())
                 .addOnFailureListener(e -> call.reject("Failed to create fence.", e));
-
     }
 
     @PluginMethod()
@@ -211,7 +220,7 @@ public class PerimeterPlugin extends Plugin{
         }
         else if(!call.hasOption("fenceUID"))
         {
-            call.reject("Please provide the id of a fence to remove.");
+            call.reject("Please provide the uid of a fence to remove.");
             return;
         }
 
@@ -267,6 +276,7 @@ public class PerimeterPlugin extends Plugin{
         for(JSObject fence : activeFences)
         {
             activeFenceUIDs.add(fence.getString("uid"));
+            Log.d(Constants.PERIMETER_TAG, fence.getString("uid"));
         }
 
         geofencingClient.removeGeofences(activeFenceUIDs);
