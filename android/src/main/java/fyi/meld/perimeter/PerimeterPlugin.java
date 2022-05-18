@@ -174,8 +174,8 @@ public class PerimeterPlugin extends Plugin{
         }
 
         for (JSONObject fence : activeFences) {
-            if((fence.optString("uid").equals(call.getString("uid")) ||
-                    fence.optDouble("lat") == call.getDouble("lat") ||
+            if(fence.optString("uid").equals(call.getString("uid")) ||
+                    (fence.optDouble("lat") == call.getDouble("lat") &&
                     fence.optDouble("lng") == call.getDouble("lng"))) {
                     call.reject("A region with the specified UID or coordinates is already fenced.");
                     return;

@@ -117,6 +117,14 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             call.reject("Failed to add a fence, please double check your location permissions.");
             return
         }
+        
+        for fence in activeFences {
+            if((fence.data["uid"] as! String) == call.getString("uid") ||
+               ((fence.data["lat"] as! Double) == call.getDouble("lat") && (fence.data["lat"] as! Double) == call.getDouble("lng"))) {
+                call.reject("A region with the specified UID or coordinates is already fenced.");
+                return;
+            }
+        }
 
         let newRegion = CLCircularRegion(
              center: CLLocationCoordinate2DMake(call.getDouble("lat")!, call.getDouble("lng")!),
@@ -140,7 +148,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         print(call.options.description)
          
         locationManager.startMonitoring(for: newRegion)
-        }
+    }
     
     @objc func removeFence(_ call: CAPPluginCall ) {
         
@@ -171,8 +179,8 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         
         if(foundFenceIndex >= 0)
         {
-            activeFences.remove(at: foundFenceIndex)
             locationManager.stopMonitoring(for: foundFence!.region)
+            activeFences.remove(at: foundFenceIndex)
             print("Successfully removed fence " + toRemoveId + ".")
             call.resolve()
         }
@@ -183,6 +191,12 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     }
     
     @objc func removeAllFences(_ call: CAPPluginCall ) {
+        
+        for (index, fence) in activeFences.enumerated() {
+            locationManager.stopMonitoring(for: fence.region)
+            activeFences.remove(at: index)
+        }
+        
         call.resolve([:])
         print("Successfully removed all fences.")
     }
