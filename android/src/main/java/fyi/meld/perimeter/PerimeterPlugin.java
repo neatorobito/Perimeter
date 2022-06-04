@@ -166,7 +166,6 @@ public class PerimeterPlugin extends Plugin{
                 !call.hasOption("lat") &&
                 !call.hasOption("lng") &&
                 !call.hasOption("radius") &&
-                !call.hasOption("expires") &&
                 !call.hasOption("monitor"))
         {
             call.reject("Please provide a valid fence object to create a new fence.");
@@ -192,7 +191,7 @@ public class PerimeterPlugin extends Plugin{
                 call.getDouble("lat"),
                 call.getDouble("lng"),
                 call.getFloat("radius"),
-                call.getInt("expires") <= 0 ? Geofence.NEVER_EXPIRE : call.getInt("expires").byteValue(),
+                Geofence.NEVER_EXPIRE,
                 getConvertedTransitionType(preferredTransitionType)
         );
 

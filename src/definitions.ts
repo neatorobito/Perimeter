@@ -8,21 +8,33 @@ export interface PerimeterPlugin {
   checkPermissions(): Promise<LocationPermissionStatus>
 
   /**
-   * Prompt the user for access to their precise location at all times. **Use this method only on older OS releases before a strict foreground and background permissions distinction was introduced. Use this method on iOS if the release <= iOS 13 or on Android if the release <= Android 9.** Attempting to use this method on a later release will return an error.
+   * Prompt the user for access to their precise location at all times on iOS 12 or Android 9 and earlier. Attempting to use this method on a later release will fail and display an console error.
   */
   requestPermissions(): Promise<LocationPermissionStatus>
 
   /**
-   * Prompt the user for access to their location while the app is running in the foreground. On iOS and Android, users must first grant this permission before your app can access their location while it is running the background. **Use this method on iOS if the release >= iOS 13 or on Android if the release >= Android 10.** Attempting to use this method on an older release will return an error.
+   * Prompt the user for access to their location while the app is running in the foreground. For use on iOS 13 or on Android 10 and later.
   */
   requestForegroundPermissions(): Promise<LocationPermissionStatus>
 
   /**
-   * Prompt the user for access to their location while the app is running in the background. On iOS and Android, uses must first grant foreground location permissions before your app can access their location while it is running the background. **Use this method on iOS if the release >= iOS 13 or on Android if the release >= Android 10.** Attempting to use this method on an older release will return an error.
+   * Prompt the user for access to their location while the app is running in the background. For use on iOS 13 or on Android 10 and later.
   */
   requestBackgroundPermissions(): Promise<LocationPermissionStatus>
+
+  /**
+   * Request that system monitor a region defined by the newFence object. When the user enters or exits your fence, you will receive a fenceEvent.
+  */
   addFence(newFence : Fence): Promise<void>
+
+  /**
+   * Stop monitoring for a fence associated with the specified identifier. If the fence cannot be found, this method will fail and display an console error.
+  */
   removeFence(options: { fenceUID: string }): void
+
+  /**
+   * Stop monitoring for all active fences; stop all background location activity performed by this module.
+  */
   removeAllFences(): void
 }
 
@@ -34,7 +46,6 @@ export class Fence {
     public lat : number,
     public lng : number,
     public radius : number,
-    public expires : number,
     public monitor : TransitionType ) {}
 
 }
@@ -53,9 +64,6 @@ export class LocationPermissionStatus {
     public background: PermissionState = "prompt") {}
 }
 
-/**
- * Nonitor
-*/
 export const enum TransitionType {
   Enter,
   Exit,

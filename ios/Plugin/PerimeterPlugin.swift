@@ -106,7 +106,6 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             call.hasOption("lat") &&
             call.hasOption("lng") &&
             call.hasOption("radius") &&
-            call.hasOption("expires") &&
             call.hasOption("monitor"))) {
             
             call.reject("Please provide a valid fence object.");
