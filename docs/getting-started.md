@@ -15,7 +15,17 @@ Geofencing relies on the device to passively monitor the user's precise location
 
 #### iOS
 
-On iOS, simply declare the capabilities and add the following property strings:
+On iOS, simply declare the capabilities:
+
+![iOS Background Location](ios_bg_location.png)
+
+Then add the following property strings:
+
+`Privacy - Location Always and When In Use Usage Description`
+
+`Privacy - Location Always Usage Description`
+
+`Privacy - Location When In Use Usage Description`
 
 #### Android
 
@@ -35,11 +45,10 @@ On iOS, simply declare the capabilities and add the following property strings:
 async requestPerms() : Promise<void> {
       this.permStatus = await Perimeter.checkPermissions();
     if(this.permStatus.foreground != "granted" || this.permStatus.background != "granted") {
-        this.permStatus = await 	Perimeter.requestPermissions();
+        this.permStatus = await Perimeter.requestPermissions();
     }
 }
 ```
-
 
 #### iOS 13 or Android 10 and later
 ```javascript
@@ -63,7 +72,11 @@ Before you call `requestBackgroundPermissions` on Android, show a dialog to help
 
 Start by setting up a listener for a `FenceEvent`:
 
-Next create a `Fence` object covering a given region.
+Perimeter.addListener("FenceEvent", (fenceEvent) => { 
+    console.log(fenceEvent.transitionType) 
+});
+
+Next, create a `Fence` object covering a given region.
 
 ```javascript
 let extraData = "I want to visit this place someday.";

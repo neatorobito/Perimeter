@@ -238,7 +238,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
                              "transitionType" : eventType.rawValue,
                              "triggerTime" : triggerTime] as [String : Any]
             
-            bridge?.triggerWindowJSEvent(eventName: "FenceEvent", data: getJSONString(from: fenceEventDict)!)
+            notifyListeners("FenceEvent", data: fenceEventDict)
         }
         else
         {

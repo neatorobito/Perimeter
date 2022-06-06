@@ -11,17 +11,15 @@
 * [`addFence(...)`](#addfence)
 * [`removeFence(...)`](#removefence)
 * [`removeAllFences()`](#removeallfences)
+* [`addListener('FenceEvent', ...)`](#addlistenerfenceevent)
+* [`removeAllListeners()`](#removealllisteners)
+* [Interfaces](#interfaces)
 
 </docgen-index>
 
 Simple cross platform geofencing for Capacitor
 
 ## [Getting Started](docs\getting-started.md)
-
-
-#### A quick note about location permissions
-
-In 2019, Apple and Google added a layer of privacy protections by changing the user's permissions flow for apps requesting precise location access while running in the background. This API provides a set of methods that helps you handle location permissions across OS versions. Use `checkPermissions()` and `requestPermissions()` on older OS releases before a strict foreground and background permissions distinction was introduced. Use `requestForegroundPermissions()` and `requestBackgroundPermissions()` on recent releases. If you attempt to call the wrong permissions method on the wrong OS version, you will receive an error.
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
@@ -117,6 +115,45 @@ removeAllFences() => void
 Stop monitoring for all active fences; stop all background location activity performed by this module.
 
 --------------------
+
+
+### addListener('FenceEvent', ...)
+
+```typescript
+addListener(eventName: "FenceEvent", listenerFunc: (data: FenceEvent) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+```
+
+Adds an event listener for geofencing events
+
+| Param              | Type                                       |
+| ------------------ | ------------------------------------------ |
+| **`eventName`**    | <code>'FenceEvent'</code>                  |
+| **`listenerFunc`** | <code>(data: FenceEvent) =&gt; void</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### removeAllListeners()
+
+```typescript
+removeAllListeners() => Promise<void>
+```
+
+Removes all geofencing event listeners
+
+--------------------
+
+
+### Interfaces
+
+
+#### PluginListenerHandle
+
+| Prop         | Type                                      |
+| ------------ | ----------------------------------------- |
+| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
 
 </docgen-api>
 

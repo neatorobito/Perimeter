@@ -1,4 +1,5 @@
 // Copyright Mark Raymond Jr. 2022. All Rights Reserved
+import type { PluginListenerHandle } from '@capacitor/core';
 
 export interface PerimeterPlugin {
 
@@ -36,6 +37,16 @@ export interface PerimeterPlugin {
    * Stop monitoring for all active fences; stop all background location activity performed by this module.
   */
   removeAllFences(): void
+
+  /**
+   * Adds an event listener for geofencing events
+   */
+  addListener( eventName: "FenceEvent", listenerFunc: (data: FenceEvent) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
+  
+  /**
+   * Removes all geofencing event listeners
+   */
+  removeAllListeners(): Promise<void>;
 }
 
 export class Fence {
