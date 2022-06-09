@@ -53,7 +53,7 @@ export class Fence {
   constructor (
     public name : string,
     public uid : string,
-    public interests : string,
+    public payload : string,
     public lat : number,
     public lng : number,
     public radius : number,

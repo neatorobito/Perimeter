@@ -72,9 +72,11 @@ Before you call `requestBackgroundPermissions` on Android, show a dialog to help
 
 Start by setting up a listener for a `FenceEvent`:
 
+```
 Perimeter.addListener("FenceEvent", (fenceEvent) => { 
-    console.log(fenceEvent.transitionType) 
+    console.log(fenceEvent.fence.payload) 
 });
+```
 
 Next, create a `Fence` object covering a given region.
 

@@ -162,7 +162,7 @@ public class PerimeterPlugin extends Plugin{
         }
         else if(!call.hasOption("name") &&
                 !call.hasOption("uid") &&
-                !call.hasOption("interests") &&
+                !call.hasOption("payload") &&
                 !call.hasOption("lat") &&
                 !call.hasOption("lng") &&
                 !call.hasOption("radius") &&
@@ -187,7 +187,7 @@ public class PerimeterPlugin extends Plugin{
 
         Geofence newFence = buildNewFence(
                 call.getString("uid"),
-                call.getString("interests"),
+                call.getString("payload"),
                 call.getDouble("lat"),
                 call.getDouble("lng"),
                 call.getFloat("radius"),

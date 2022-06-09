@@ -102,7 +102,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         }
         else if(!(call.hasOption("name") &&
             call.hasOption("uid") &&
-            call.hasOption("interests") &&
+            call.hasOption("payload") &&
             call.hasOption("lat") &&
             call.hasOption("lng") &&
             call.hasOption("radius") &&
