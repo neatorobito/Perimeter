@@ -61,7 +61,7 @@ public class PerimeterPlugin extends Plugin{
     private GeofencingClient geofencingClient;
     private PendingIntent fencePendingIntent;
     private ArrayList<JSObject> activeFences;
-    private Class<? extends PerimeterReceiver> fenceReceiver;
+    private PerimeterReceiver fenceReceiver;
 
     public PerimeterPlugin()
     {
@@ -71,7 +71,7 @@ public class PerimeterPlugin extends Plugin{
     @Override
     public void load() {
         super.load();
-        this.fenceReceiver = (((PerimeterApplication) getActivity().getApplication()).GetGeofenceReceiverClass());
+        this.fenceReceiver = new PerimeterReceiver();
         tryInitClient();
     }
 
@@ -181,8 +181,6 @@ public class PerimeterPlugin extends Plugin{
             }
         }
 
-        Log.d(Constants.PERIMETER_TAG, call.getData().toString());
-
         Constants.TRANSITION_TYPE preferredTransitionType = Constants.TRANSITION_TYPE.values()[call.getInt("monitor")];
 
         Geofence newFence = buildNewFence(
@@ -202,6 +200,8 @@ public class PerimeterPlugin extends Plugin{
         geofencingClient.addGeofences(getGeoFencingRequest(fenceToAdd), getFencePendingIntent())
                 .addOnSuccessListener(v -> call.resolve())
                 .addOnFailureListener(e -> call.reject("Failed to create fence.", e));
+
+        Log.d(Constants.PERIMETER_TAG, "Began monitoring for " + call.getString("uid") + ".");
     }
 
     @PluginMethod()
@@ -353,7 +353,7 @@ public class PerimeterPlugin extends Plugin{
         {
             if(fencePendingIntent == null)
             {
-                Intent intent = new Intent(getContext(), fenceReceiver);
+                Intent intent = new Intent(getContext(), fenceReceiver.getClass());
 
                 try {
                     intent.putExtra(Constants.ALL_ACTIVE_FENCES_EXTRA, new JSArray(activeFences.toArray()).toString());
@@ -365,7 +365,7 @@ public class PerimeterPlugin extends Plugin{
                 }
 
                 fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent,
-                        PendingIntent.FLAG_ONE_SHOT);
+                        PendingIntent.FLAG_UPDATE_CURRENT);
             }
         }
         else

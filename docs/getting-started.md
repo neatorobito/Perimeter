@@ -19,7 +19,7 @@ On iOS, simply declare the capabilities:
 
 ![iOS Background Location](ios_bg_location.png)
 
-Then add the following property strings:
+Then add a description for the following property strings:
 
 `Privacy - Location Always and When In Use Usage Description`
 
@@ -36,6 +36,47 @@ Then add the following property strings:
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 ```
+
+2. Next, create a class that extends `PerimeterReceiver` (for example, MyGeofenceReceiver.java)
+
+   ```java
+   public class MyGeofenceReceiver extends PerimeterReceiver {
+       @Override
+       public void onEntrance(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime) {
+           
+       }
+   
+       @Override
+       public void onExit(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime) {
+   
+       }
+   
+       @Override
+       public void onError(Context context, int errorCode, String errorMessage) {
+   
+       }
+   }
+   ```
+
+   **Once you create and add these classes to your AndroidManifest.xml, Perimeter will automatically forward system level geofencing events to your Capacitor application. You can leave these methods empty unless you need to do other lower-level actions when a geofence is triggered.  **
+
+2. Finally, create an application class that extends `PerimeterApplication` (for example MyApplication.java) and return the Broadcast Receiver class you created in the last step:
+```java
+public class MyApplication extends Application implements PerimeterApplication {
+    @Override
+    public Class<? extends PerimeterReceiver> GetGeofenceReceiverClass() {
+        return MyGeofenceReceiver.class;
+    }
+}
+```
+
+And add this new class to your AndroidManifest.xml:
+```
+    <application
+        android:name=".PicketFenceApplication"
+        ...>
+```
+
 
 ### Requesting Permissions
 
