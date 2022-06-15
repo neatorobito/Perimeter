@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.getcapacitor.JSObject;
@@ -28,8 +29,16 @@ import java.util.List;
 
 public class PerimeterReceiver extends BroadcastReceiver {
 
-//    public abstract void onFenceTriggered(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime);
-//    public abstract void onError(Context context, int errorCode,String errorMessage);
+    interface FenceEventHandler {
+        public void onFenceTriggered(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime, int transitionType);
+        public void onError(Context context, int errorCode, String errorMessage);
+    }
+
+    FenceEventHandler fenceEventHandler;
+
+    public void setFenceEventHandler(FenceEventHandler fenceEventHandler) {
+        this.fenceEventHandler = fenceEventHandler;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -40,7 +49,7 @@ public class PerimeterReceiver extends BroadcastReceiver {
             int errorCode = geofencingEvent.getErrorCode();
             String errorMessage = GoogleApiAvailabilityLight.getInstance().getErrorString(errorCode);
             Log.e(Constants.PERIMETER_TAG, "There was an error while processing a fence trigger event. Error details: " +  errorMessage);
-//            onError(context, errorCode, errorMessage);
+            if(fenceEventHandler != null) { fenceEventHandler.onError(context, errorCode, errorMessage); };
             return;
         }
 
@@ -63,8 +72,6 @@ public class PerimeterReceiver extends BroadcastReceiver {
 
                         if(jsonFence.getString("uid").equals(triggeredFences.get(k).getRequestId()))
                         {
-                            jsonFence.put("triggerTime", triggeringTime);
-                            jsonFence.put("transitionType", transitionType);
                             triggeredJSObj.add(jsonFence);
                             Log.d(Constants.PERIMETER_TAG, "Fence event was successfully triggered for " + triggeredFences.get(k).getRequestId() + ".");
                         }
@@ -76,17 +83,7 @@ public class PerimeterReceiver extends BroadcastReceiver {
                 Log.d(Constants.PERIMETER_TAG, "Failed to parse intent extras while reconciling triggered and available.");
             }
 
-//            switch(transitionType)
-//            {
-//                case Geofence.GEOFENCE_TRANSITION_ENTER:
-//                    onEntrance(context, triggeredJSObj, triggeringTime);
-//                    break;
-//                case Geofence.GEOFENCE_TRANSITION_EXIT:
-//                    onExit(context, triggeredJSObj, triggeringTime);
-//                    break;
-//                default:
-//                    break;
-//            }
+            if(fenceEventHandler != null) { fenceEventHandler.onFenceTriggered(context, triggeredJSObj, triggeringTime, transitionType); };
         }
     }
 }

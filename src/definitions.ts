@@ -64,7 +64,7 @@ export class Fence {
 export class FenceEvent
 {
   constructor (
-    public fence : Fence,
+    public fences : Fence,
     public time : number,
     public transitionType : TransitionType ) {}
 }

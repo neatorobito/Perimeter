@@ -7,8 +7,10 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
@@ -56,7 +58,7 @@ import java.util.ArrayList;
         }
 )
 
-public class PerimeterPlugin extends Plugin{
+public class PerimeterPlugin extends Plugin implements PerimeterReceiver.FenceEventHandler {
 
     private GeofencingClient geofencingClient;
     private PendingIntent fencePendingIntent;
@@ -72,6 +74,8 @@ public class PerimeterPlugin extends Plugin{
     public void load() {
         super.load();
         this.fenceReceiver = new PerimeterReceiver();
+        fenceReceiver.setFenceEventHandler(this);
+        getActivity().registerReceiver(fenceReceiver, new IntentFilter());
         tryInitClient();
     }
 
@@ -381,5 +385,21 @@ public class PerimeterPlugin extends Plugin{
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         builder.addGeofences(geofences);
         return builder.build();
+    }
+
+    @Override
+    public void onFenceTriggered(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime, int transitionType) {
+
+        JSObject fenceEvent = new JSObject();
+        fenceEvent.put("fences", triggeredJSFences);
+        fenceEvent.put("time", triggerTime);
+        fenceEvent.put("transitionType", transitionType);
+
+        notifyListeners("FenceEvent", fenceEvent);
+    }
+
+    @Override
+    public void onError(Context context, int errorCode, String errorMessage) {
+
     }
 }
