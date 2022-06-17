@@ -229,21 +229,20 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     {
         let (resolvedFenceIndex, resolvedFence) = getFenceByUID(uid: triggeredRegion.identifier)
         let triggerTime = NSDate().timeIntervalSince1970
-        
+                
         if(resolvedFenceIndex >= 0)
         {
             print("Fence event triggered for " + triggeredRegion.identifier);
-            
-            let fenceEventDict = ["fence": resolvedFence!.data,
-                             "transitionType" : eventType.rawValue,
-                             "triggerTime" : triggerTime] as [String : Any]
+            let fenceEventDict = ["fences": [resolvedFence!.data],
+                                  "time" : triggerTime,
+                                  "monitor" : eventType.rawValue ] as [String : Any]
             
             notifyListeners("FenceEvent", data: fenceEventDict)
         }
         else
         {
-            print("A fence event was triggered for " + triggeredRegion.identifier);
-            print("This region may have already been removed from the active list of regions.");
+            // Here a fence event was triggered for a region that has been removed from our list, but never removed from CoreLocation. Try to remove it to keep order.
+            locationManager.stopMonitoring(for: triggeredRegion);
         }
     }
     
