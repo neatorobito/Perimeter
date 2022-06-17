@@ -5,21 +5,14 @@ package fyi.meld.perimeter;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Application;
 import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 
-import com.getcapacitor.Bridge;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
@@ -34,6 +27,9 @@ import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,12 +54,34 @@ import java.util.ArrayList;
         }
 )
 
-public class PerimeterPlugin extends Plugin implements PerimeterReceiver.FenceEventHandler {
+public final class PerimeterPlugin extends Plugin {
+
+    public static class FenceEvent {
+        JSArray fences;
+        long time;
+        int monitor;
+
+        public FenceEvent(ArrayList<JSObject> fences, long time, int monitor) {
+            this.fences = new JSArray(fences);
+            this.time = time;
+            this.monitor = monitor;
+        }
+    }
+
+    public static class PlatformErrorEvent {
+        int errorCode;
+        String errorMessage;
+
+        public PlatformErrorEvent(int errorCode, String errorMessage) {
+            this.errorCode = errorCode;
+            this.errorMessage = errorMessage;
+        }
+    }
 
     private GeofencingClient geofencingClient;
     private PendingIntent fencePendingIntent;
     private ArrayList<JSObject> activeFences;
-    private PerimeterReceiver fenceReceiver;
+    private Class<? extends PerimeterReceiver> fenceReceiverClass;
 
     public PerimeterPlugin()
     {
@@ -73,9 +91,7 @@ public class PerimeterPlugin extends Plugin implements PerimeterReceiver.FenceEv
     @Override
     public void load() {
         super.load();
-        this.fenceReceiver = new PerimeterReceiver();
-        fenceReceiver.setFenceEventHandler(this);
-        getActivity().registerReceiver(fenceReceiver, new IntentFilter());
+        tryGetCustomReceiver();
         tryInitClient();
     }
 
@@ -85,6 +101,19 @@ public class PerimeterPlugin extends Plugin implements PerimeterReceiver.FenceEv
         {
             geofencingClient = LocationServices.getGeofencingClient(getContext());
             Log.d(Constants.PERIMETER_TAG, Constants.CLIENT_INITIALIZED);
+        }
+    }
+
+    private void tryGetCustomReceiver()
+    {
+        Application capApp = getActivity().getApplication();
+
+        if(capApp instanceof PerimeterApplicationHooks) {
+            this.fenceReceiverClass = ((PerimeterApplicationHooks) capApp).GetCustomReceiverClass();
+        }
+        else
+        {
+            fenceReceiverClass = SimplePerimeterReceiver.class;
         }
     }
 
@@ -307,8 +336,6 @@ public class PerimeterPlugin extends Plugin implements PerimeterReceiver.FenceEv
                 break;
         }
 
-        Log.d(Constants.PERIMETER_TAG, "TransitionType" + preferredTransitionType);
-
         return preferredTransitionType;
     }
 
@@ -353,28 +380,21 @@ public class PerimeterPlugin extends Plugin implements PerimeterReceiver.FenceEv
     @SuppressLint("UnspecifiedImmutableFlag")
     private PendingIntent getFencePendingIntent() {
 
-        if(fenceReceiver != null)
+        if(fencePendingIntent == null)
         {
-            if(fencePendingIntent == null)
-            {
-                Intent intent = new Intent(getContext(), fenceReceiver.getClass());
+            Intent intent = new Intent(getContext(), fenceReceiverClass);
 
-                try {
-                    intent.putExtra(Constants.ALL_ACTIVE_FENCES_EXTRA, new JSArray(activeFences.toArray()).toString());
-                }
-                catch(JSONException e)
-                {
-                    Log.d(Constants.PERIMETER_TAG, "Failed to pack intent data when creating a new fence.");
-                    System.exit(1);
-                }
-
-                fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+            try {
+                intent.putExtra(Constants.ALL_ACTIVE_FENCES_EXTRA, new JSArray(activeFences.toArray()).toString());
             }
-        }
-        else
-        {
-            throw new NullPointerException("fenceReceiver is null, no class that implements PerimeterReceiver was provided.");
+            catch(JSONException e)
+            {
+                Log.d(Constants.PERIMETER_TAG, "Failed to pack intent data when creating a new fence.");
+                System.exit(1);
+            }
+
+            fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         return fencePendingIntent;
@@ -388,18 +408,35 @@ public class PerimeterPlugin extends Plugin implements PerimeterReceiver.FenceEv
     }
 
     @Override
-    public void onFenceTriggered(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime, int transitionType) {
-
-        JSObject fenceEvent = new JSObject();
-        fenceEvent.put("fences", triggeredJSFences);
-        fenceEvent.put("time", triggerTime);
-        fenceEvent.put("transitionType", transitionType);
-
-        notifyListeners("FenceEvent", fenceEvent);
+    protected void handleOnStart() {
+        super.handleOnStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onError(Context context, int errorCode, String errorMessage) {
+    protected void handleOnStop() {
+        super.handleOnStop();
+        EventBus.getDefault().unregister(this);
+    }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onFenceEvent(FenceEvent event) {
+        JSObject fenceEventJS = new JSObject();
+
+        fenceEventJS.put("fences", event.fences);
+        fenceEventJS.put("time", event.time);
+        fenceEventJS.put("monitor", event.monitor);
+
+        notifyListeners("FenceEvent", fenceEventJS);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPlatformErrorEvent(PlatformErrorEvent event) {
+        JSObject errorEvent = new JSObject();
+
+        errorEvent.put("errorCode", event.errorCode);
+        errorEvent.put("errorMessage", event.errorMessage);
+
+        notifyListeners("PlatformErrorEvent", errorEvent);
     }
 }

@@ -20,6 +20,7 @@ import com.google.android.gms.common.GoogleApiAvailabilityLight;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,18 +28,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PerimeterReceiver extends BroadcastReceiver {
+public abstract class PerimeterReceiver extends BroadcastReceiver {
 
-    interface FenceEventHandler {
-        public void onFenceTriggered(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime, int transitionType);
-        public void onError(Context context, int errorCode, String errorMessage);
-    }
-
-    FenceEventHandler fenceEventHandler;
-
-    public void setFenceEventHandler(FenceEventHandler fenceEventHandler) {
-        this.fenceEventHandler = fenceEventHandler;
-    }
+    public abstract void onFenceTriggered(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime, int transitionType);
+    public abstract void onError(Context context, int errorCode, String errorMessage);
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -49,7 +42,8 @@ public class PerimeterReceiver extends BroadcastReceiver {
             int errorCode = geofencingEvent.getErrorCode();
             String errorMessage = GoogleApiAvailabilityLight.getInstance().getErrorString(errorCode);
             Log.e(Constants.PERIMETER_TAG, "There was an error while processing a fence trigger event. Error details: " +  errorMessage);
-            if(fenceEventHandler != null) { fenceEventHandler.onError(context, errorCode, errorMessage); };
+            onError(context, errorCode, errorMessage);
+            EventBus.getDefault().post(new PerimeterPlugin.PlatformErrorEvent(errorCode, errorMessage));
             return;
         }
 
@@ -83,7 +77,8 @@ public class PerimeterReceiver extends BroadcastReceiver {
                 Log.d(Constants.PERIMETER_TAG, "Failed to parse intent extras while reconciling triggered and available.");
             }
 
-            if(fenceEventHandler != null) { fenceEventHandler.onFenceTriggered(context, triggeredJSObj, triggeringTime, transitionType); };
+            onFenceTriggered(context, triggeredJSObj, triggeringTime, transitionType);
+            EventBus.getDefault().post(new PerimeterPlugin.FenceEvent(triggeredJSObj, triggeringTime, transitionType));
         }
     }
 }

@@ -1,7 +1,7 @@
 // Copyright Mark Raymond Jr. 2022. All Rights Reserved
 package fyi.meld.perimeter;
 
-public class Constants {
+public final class Constants {
 
     public static final String PERIMETER_TAG = "Perimeter";
     public static final String ALL_ACTIVE_FENCES_EXTRA = "fencesActiveWhenAdded";

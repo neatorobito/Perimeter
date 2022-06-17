@@ -35,19 +35,13 @@ Then add a description for the following property strings:
 <uses-feature android:name="android.hardware.location.gps" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+<receiver
+	android:name="fyi.meld.perimeter.SimplePerimeterReceiver"
+    android:enabled="true"
+    android:exported="true">
+</receiver>
 ```
-
-2. Next, create a class that extends `PerimeterReceiver` (for example, MyGeofenceReceiver.java)
-
-```java
-	<receiver
-		android:name="fyi.meld.perimeter.PerimeterReceiver"
-		android:enabled="true"
-		android:exported="true">
-	</receiver>
-```
-
-   **Once you create and add these classes to your AndroidManifest.xml, Perimeter will automatically forward system level geofencing events to your Capacitor application. You can leave these methods empty unless you need to do other lower-level actions when a geofence is triggered.  **
 
 
 ### Requesting Permissions

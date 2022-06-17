@@ -11,9 +11,10 @@
 * [`addFence(...)`](#addfence)
 * [`removeFence(...)`](#removefence)
 * [`removeAllFences()`](#removeallfences)
-* [`addListener('FenceEvent', ...)`](#addlistenerfenceevent)
+* [`addListener(string, ...)`](#addlistenerstring)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -117,18 +118,18 @@ Stop monitoring for all active fences; stop all background location activity per
 --------------------
 
 
-### addListener('FenceEvent', ...)
+### addListener(string, ...)
 
 ```typescript
-addListener(eventName: "FenceEvent", listenerFunc: (data: FenceEvent) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+addListener(eventName: string, listenerFunc: (data: PerimeterEvent) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-Adds an event listener for geofencing events
+Add an event listener for geofencing or platform specific error events.
 
-| Param              | Type                                       |
-| ------------------ | ------------------------------------------ |
-| **`eventName`**    | <code>'FenceEvent'</code>                  |
-| **`listenerFunc`** | <code>(data: FenceEvent) =&gt; void</code> |
+| Param              | Type                                                                         |
+| ------------------ | ---------------------------------------------------------------------------- |
+| **`eventName`**    | <code>string</code>                                                          |
+| **`listenerFunc`** | <code>(data: <a href="#perimeterevent">PerimeterEvent</a>) =&gt; void</code> |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
@@ -141,7 +142,7 @@ Adds an event listener for geofencing events
 removeAllListeners() => Promise<void>
 ```
 
-Removes all geofencing event listeners
+Remove all geofencing event listeners
 
 --------------------
 
@@ -154,6 +155,14 @@ Removes all geofencing event listeners
 | Prop         | Type                                      |
 | ------------ | ----------------------------------------- |
 | **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
+
+
+### Type Aliases
+
+
+#### PerimeterEvent
+
+<code>FenceEvent | PlatformErrorEvent</code>
 
 </docgen-api>
 

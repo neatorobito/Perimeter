@@ -1,4 +1,4 @@
-// Copyright Mark Raymond Jr. 2022. All Rights Reserved
+// Copyright Mark Raymond Jr., All Rights Reserved. 2022
 import type { PluginListenerHandle } from '@capacitor/core';
 
 export interface PerimeterPlugin {
@@ -39,12 +39,12 @@ export interface PerimeterPlugin {
   removeAllFences(): void
 
   /**
-   * Adds an event listener for geofencing events
+   * Add an event listener for geofencing or platform specific error events.
    */
-  addListener( eventName: "FenceEvent", listenerFunc: (data: FenceEvent) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
+  addListener( eventName: string, listenerFunc: (data: PerimeterEvent) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
   
   /**
-   * Removes all geofencing event listeners
+   * Remove all geofencing event listeners
    */
   removeAllListeners(): Promise<void>;
 }
@@ -64,9 +64,16 @@ export class Fence {
 export class FenceEvent
 {
   constructor (
-    public fences : Fence,
+    public fences : Array<Fence>,
     public time : number,
     public transitionType : TransitionType ) {}
+}
+
+export class PlatformErrorEvent
+{
+  constructor (
+    public code : number,
+    public message : string ) {}
 }
 
 export class LocationPermissionStatus {
@@ -80,3 +87,5 @@ export const enum TransitionType {
   Exit,
   Both
 }
+
+export type PerimeterEvent = FenceEvent | PlatformErrorEvent;
