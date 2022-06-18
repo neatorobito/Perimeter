@@ -37,7 +37,7 @@ Then add a description for the following property strings:
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
 <receiver
-	android:name="fyi.meld.perimeter.SimplePerimeterReceiver"
+    android:name="fyi.meld.perimeter.SimplePerimeterReceiver"
     android:enabled="true"
     android:exported="true">
 </receiver>
