@@ -118,9 +118,9 @@ Finally, call `addFence(newFence)` to begin monitoring the region.
 When the user enters and/or exits the region, you'll get a `FenceEvent` that looks something like this:
 ```javascript
 FenceEvent {
-    fence : Fence{},
+    fences : 'A list of fences that were triggered by a given action',
     time : 'Trigger time in milliseconds',
-    transitionType : 'The type of action that triggered this event (enter or exit).'
+    transitionType : 'The type of action that triggered this event (enter or exit)'
 };
 ```
 
