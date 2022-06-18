@@ -79,7 +79,7 @@ Before you call `requestBackgroundPermissions` on Android, show a dialog to help
 
 Start by setting up a listener for a `FenceEvent`:
 
-```
+```javascript
 Perimeter.addListener("FenceEvent", (fenceEvent) => { 
     console.log(fenceEvent.fence.payload) 
 });
@@ -109,7 +109,7 @@ Perimeter.addFence(newFence).then(() => {
 
 The name, UID, latitude, and longitude fields are self explanatory. For the other fields:
 
-* `payload`: A extra field that will be delivered back to you when a `FenceEvent` is  triggered.
+* `payload`: A extra field containing `String` data that you can use. It will be delivered back to you when a `FenceEvent` is triggered.
 * `radius`: The radius of the circular region to be monitored in meters. Across iOS and Android the minimum is 100m.
 * `monitor`: Specify the `TransitionType` that will trigger a `FenceEvent`.
 
