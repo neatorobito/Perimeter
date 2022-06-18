@@ -95,7 +95,7 @@ Request that system monitor a region defined by the newFence object. When the us
 ### removeFence(...)
 
 ```typescript
-removeFence(options: { fenceUID: string; }) => void
+removeFence(options: { fenceUID: string; }) => Promise<void>
 ```
 
 Stop monitoring for a fence associated with the specified identifier. If the fence cannot be found, this method will fail and display an console error.
@@ -110,7 +110,7 @@ Stop monitoring for a fence associated with the specified identifier. If the fen
 ### removeAllFences()
 
 ```typescript
-removeAllFences() => void
+removeAllFences() => Promise<void>
 ```
 
 Stop monitoring for all active fences; stop all background location activity performed by this module.

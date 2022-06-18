@@ -31,12 +31,12 @@ export interface PerimeterPlugin {
   /**
    * Stop monitoring for a fence associated with the specified identifier. If the fence cannot be found, this method will fail and display an console error.
   */
-  removeFence(options: { fenceUID: string }): void
+  removeFence(options: { fenceUID: string }): Promise<void>
 
   /**
    * Stop monitoring for all active fences; stop all background location activity performed by this module.
   */
-  removeAllFences(): void
+  removeAllFences(): Promise<void>
 
   /**
    * Add an event listener for geofencing or platform specific error events.
@@ -58,7 +58,6 @@ export class Fence {
     public lng : number,
     public radius : number,
     public monitor : TransitionType ) {}
-
 }
 
 export class FenceEvent
@@ -86,6 +85,17 @@ export const enum TransitionType {
   Enter,
   Exit,
   Both
+}
+
+export const enum PerimeterError {
+  CLIENT_UNINITIALIZED,
+  GENERIC_PLATFORM_ERROR,
+  NO_PERMISSIONS,
+  FOREGROUND_DENIED,
+  INVALID_FENCE_OBJ,
+  ALREADY_FENCED,
+  NO_OR_INVALID_ARGS,
+  FENCE_NOT_FOUND,
 }
 
 export type PerimeterEvent = FenceEvent | PlatformErrorEvent;

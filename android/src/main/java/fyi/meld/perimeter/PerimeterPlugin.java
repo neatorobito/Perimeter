@@ -2,6 +2,8 @@
 
 package fyi.meld.perimeter;
 
+import static fyi.meld.perimeter.Constants.*;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -30,7 +32,6 @@ import com.google.android.gms.location.LocationServices;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,14 +40,14 @@ import java.util.ArrayList;
 @TargetApi(30)
 @CapacitorPlugin(
         name = "Perimeter",
-        requestCodes = { Constants.LOCATIONS_PERMISSIONS_REQUEST_CODE },
+        requestCodes = { LOCATIONS_PERMISSIONS_REQUEST_CODE },
         permissions = {
-                @Permission (alias = Constants.FOREGROUND_ALIAS,
+                @Permission (alias = FOREGROUND_ALIAS,
                         strings = {
                                 Manifest.permission.ACCESS_FINE_LOCATION,
                         }
                 ),
-                @Permission (alias = Constants.BACKGROUND_ALIAS,
+                @Permission (alias = BACKGROUND_ALIAS,
                         strings = {
                                 Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                         }
@@ -76,6 +77,11 @@ public final class PerimeterPlugin extends Plugin {
             this.errorCode = errorCode;
             this.errorMessage = errorMessage;
         }
+
+        public PlatformErrorEvent(PERIMETER_ERROR perimeterErrorCode) {
+            this.errorCode = perimeterErrorCode.ordinal();
+            this.errorMessage = ERROR_MESSAGES.get(this.errorCode);
+        }
     }
 
     private GeofencingClient geofencingClient;
@@ -100,7 +106,7 @@ public final class PerimeterPlugin extends Plugin {
         if(hasLocationPermissions() && geofencingClient == null)
         {
             geofencingClient = LocationServices.getGeofencingClient(getContext());
-            Log.d(Constants.PERIMETER_TAG, Constants.CLIENT_INITIALIZED);
+            Log.d(PERIMETER_TAG, CLIENT_INITIALIZED);
         }
     }
 
@@ -117,10 +123,10 @@ public final class PerimeterPlugin extends Plugin {
         }
     }
 
-    private boolean hasForegroundPermissions() { return (getPermissionState(Constants.FOREGROUND_ALIAS) == PermissionState.GRANTED); };
+    private boolean hasForegroundPermissions() { return (getPermissionState(FOREGROUND_ALIAS) == PermissionState.GRANTED); };
 
     private boolean hasBackgroundPermissions() {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || (getPermissionState(Constants.BACKGROUND_ALIAS) == PermissionState.GRANTED);
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || (getPermissionState(BACKGROUND_ALIAS) == PermissionState.GRANTED);
     };
 
     private boolean hasLocationPermissions()
@@ -130,25 +136,23 @@ public final class PerimeterPlugin extends Plugin {
 
     @PluginMethod
     public void requestForegroundPermissions(PluginCall call) {
-        requestPermissionForAlias(Constants.FOREGROUND_ALIAS, call, "locationPermissionsCallback");
+        requestPermissionForAlias(FOREGROUND_ALIAS, call, "locationPermissionsCallback");
     }
 
     @PluginMethod
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public void requestBackgroundPermissions(PluginCall call) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            call.unavailable("This method is only available on Android Q or later.");
+            call.unavailable(ERROR_MESSAGES.get(PERIMETER_ERROR.FOREGROUND_DENIED));
             return;
         }
         else if(!hasForegroundPermissions())
         {
-            call.reject("This method requires foreground permissions with " +
-                    "ACCESS_COARSE_LOCATION permissions first." +
-                    " Ensure you've called Perimeter.requestForegroundPermissions before calling this method.");
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.FOREGROUND_DENIED));
             return;
         }
 
-        requestPermissionForAlias(Constants.BACKGROUND_ALIAS, call, "locationPermissionsCallback");
+        requestPermissionForAlias(BACKGROUND_ALIAS, call, "locationPermissionsCallback");
     }
 
     @Override
@@ -156,14 +160,14 @@ public final class PerimeterPlugin extends Plugin {
     @PermissionCallback
     public void checkPermissions(PluginCall pluginCall) {
         JSObject permissionsResults = new JSObject();
-        permissionsResults.put(Constants.FOREGROUND_ALIAS, getPermissionState(Constants.FOREGROUND_ALIAS));
+        permissionsResults.put(FOREGROUND_ALIAS, getPermissionState(FOREGROUND_ALIAS));
 
         // Capacitor does not handle this correctly, so we need to override it below Android 10.
         PermissionState backgroundPermissionState = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
                 PermissionState.GRANTED :
-                getPermissionState(Constants.BACKGROUND_ALIAS);
+                getPermissionState(BACKGROUND_ALIAS);
 
-        permissionsResults.put(Constants.BACKGROUND_ALIAS, backgroundPermissionState);
+        permissionsResults.put(BACKGROUND_ALIAS, backgroundPermissionState);
 
         pluginCall.resolve(permissionsResults);
     }
@@ -185,12 +189,12 @@ public final class PerimeterPlugin extends Plugin {
     {
         if(!hasLocationPermissions())
         {
-            call.reject(Constants.PERMISSION_DENIED_NOTICE);
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.INCORRECT_PERMISSIONS), PERIMETER_ERROR.INCORRECT_PERMISSIONS.name());
             return;
         }
         else if(geofencingClient == null)
         {
-            call.reject(Constants.CLIENT_UNINITIALIZED);
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.CLIENT_UNINITIALIZED), PERIMETER_ERROR.CLIENT_UNINITIALIZED.name());
             return;
         }
         else if(!call.hasOption("name") &&
@@ -201,7 +205,7 @@ public final class PerimeterPlugin extends Plugin {
                 !call.hasOption("radius") &&
                 !call.hasOption("monitor"))
         {
-            call.reject("Please provide a valid fence object to create a new fence.");
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.INVALID_FENCE_OBJ), PERIMETER_ERROR.INVALID_FENCE_OBJ.name());
             return;
         }
 
@@ -209,12 +213,12 @@ public final class PerimeterPlugin extends Plugin {
             if(fence.optString("uid").equals(call.getString("uid")) ||
                     (fence.optDouble("lat") == call.getDouble("lat") &&
                     fence.optDouble("lng") == call.getDouble("lng"))) {
-                    call.reject("A region with the specified UID or coordinates is already fenced.");
+                        call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.ALREADY_FENCED), PERIMETER_ERROR.ALREADY_FENCED.name());
                     return;
             }
         }
 
-        Constants.TRANSITION_TYPE preferredTransitionType = Constants.TRANSITION_TYPE.values()[call.getInt("monitor")];
+        TRANSITION_TYPE preferredTransitionType = TRANSITION_TYPE.values()[call.getInt("monitor")];
 
         Geofence newFence = buildNewFence(
                 call.getString("uid"),
@@ -232,9 +236,11 @@ public final class PerimeterPlugin extends Plugin {
 
         geofencingClient.addGeofences(getGeoFencingRequest(fenceToAdd), getFencePendingIntent())
                 .addOnSuccessListener(v -> call.resolve())
-                .addOnFailureListener(e -> call.reject("Failed to create fence.", e));
-
-        Log.d(Constants.PERIMETER_TAG, "Began monitoring for " + call.getString("uid") + ".");
+                .addOnFailureListener(e -> {
+                    Log.e(PERIMETER_TAG, e.getLocalizedMessage());
+                    call.reject(e.getLocalizedMessage(), PERIMETER_ERROR.GENERIC_PLATFORM_ERROR.name());
+                });
+        Log.d(PERIMETER_TAG, "Began monitoring for " + call.getString("uid") + ".");
     }
 
     @PluginMethod()
@@ -242,17 +248,17 @@ public final class PerimeterPlugin extends Plugin {
     {
         if(!hasLocationPermissions())
         {
-            call.reject(Constants.PERMISSION_DENIED_NOTICE);
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.INCORRECT_PERMISSIONS), PERIMETER_ERROR.INCORRECT_PERMISSIONS.name());
             return;
         }
         else if(geofencingClient == null)
         {
-            call.reject(Constants.CLIENT_UNINITIALIZED);
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.CLIENT_UNINITIALIZED), PERIMETER_ERROR.CLIENT_UNINITIALIZED.name());
             return;
         }
         else if(!call.hasOption("fenceUID"))
         {
-            call.reject("Please provide the uid of a fence to remove.");
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.NO_OR_INVALID_ARGS), PERIMETER_ERROR.NO_OR_INVALID_ARGS.name());
             return;
         }
 
@@ -269,7 +275,7 @@ public final class PerimeterPlugin extends Plugin {
 
         if(!foundInActive)
         {
-            call.reject("A fence with that id was not found in the list of active fences.");
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.FENCE_NOT_FOUND), PERIMETER_ERROR.FENCE_NOT_FOUND.name());
             return;
         }
         else
@@ -279,7 +285,7 @@ public final class PerimeterPlugin extends Plugin {
 
             geofencingClient.removeGeofences(fenceToRemove);
             call.resolve();
-            Log.d(Constants.PERIMETER_TAG, "Successfully removed fence " + fenceUID + ".");
+            Log.d(PERIMETER_TAG, "Successfully removed fence " + fenceUID + ".");
         }
     }
 
@@ -288,18 +294,18 @@ public final class PerimeterPlugin extends Plugin {
     {
         if(!hasLocationPermissions())
         {
-            call.reject(Constants.PERMISSION_DENIED_NOTICE);
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.INCORRECT_PERMISSIONS), PERIMETER_ERROR.INCORRECT_PERMISSIONS.name());
             return;
         }
         else if(geofencingClient == null)
         {
-            call.reject(Constants.CLIENT_UNINITIALIZED);
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.CLIENT_UNINITIALIZED), PERIMETER_ERROR.CLIENT_UNINITIALIZED.name());
             return;
         }
         else if (activeFences.size() == 0)
         {
             call.resolve();
-            Log.d(Constants.PERIMETER_TAG, "There are no active fences.");
+            Log.d(PERIMETER_TAG, "There are no active fences.");
             return;
         }
 
@@ -308,16 +314,16 @@ public final class PerimeterPlugin extends Plugin {
         for(JSObject fence : activeFences)
         {
             activeFenceUIDs.add(fence.getString("uid"));
-            Log.d(Constants.PERIMETER_TAG, fence.getString("uid"));
+            Log.d(PERIMETER_TAG, fence.getString("uid"));
         }
 
         geofencingClient.removeGeofences(activeFenceUIDs);
         activeFences.clear();
         call.resolve();
-        Log.d(Constants.PERIMETER_TAG, "Successfully removed all fences.");
+        Log.d(PERIMETER_TAG, "Successfully removed all fences.");
     }
 
-    private int getConvertedTransitionType(Constants.TRANSITION_TYPE transitionTypes)
+    private int getConvertedTransitionType(TRANSITION_TYPE transitionTypes)
     {
         int preferredTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT;
 
@@ -339,22 +345,6 @@ public final class PerimeterPlugin extends Plugin {
         return preferredTransitionType;
     }
 
-    public static JSONArray parseIntentExtras(Intent intent)
-    {
-        JSONArray parsedExtras = null;
-
-        try {
-            parsedExtras = new JSONArray(intent.getStringExtra(Constants.ALL_ACTIVE_FENCES_EXTRA));
-        }
-        catch(JSONException e)
-        {
-            Log.d(Constants.PERIMETER_TAG, "Failed to parse data from the intent's extras.");
-            System.exit(1);
-        }
-
-        return parsedExtras;
-    }
-
     private Geofence buildNewFence(String identifier, String type, double lat, double lang, float radiusInMeters, long expirationInMillis, int transitionTypes) {
         return new Geofence.Builder()
             // Set the request ID of the geofence. This is a string to identify this
@@ -364,7 +354,7 @@ public final class PerimeterPlugin extends Plugin {
             // Set circular region of the geofence
             .setCircularRegion(lat, lang, radiusInMeters)
 
-            .setNotificationResponsiveness(Constants.STANDARD_GEOFENCE_RESPONSIVENESS_MILLISECONDS)
+            .setNotificationResponsiveness(STANDARD_GEOFENCE_RESPONSIVENESS_MILLISECONDS)
 
             // Set the expiration duration of the geofence.
             .setExpirationDuration(expirationInMillis)
@@ -385,12 +375,12 @@ public final class PerimeterPlugin extends Plugin {
             Intent intent = new Intent(getContext(), fenceReceiverClass);
 
             try {
-                intent.putExtra(Constants.ALL_ACTIVE_FENCES_EXTRA, new JSArray(activeFences.toArray()).toString());
+                intent.putExtra(ALL_ACTIVE_FENCES_EXTRA, new JSArray(activeFences.toArray()).toString());
             }
             catch(JSONException e)
             {
-                Log.d(Constants.PERIMETER_TAG, "Failed to pack intent data when creating a new fence.");
-                System.exit(1);
+                Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(PERIMETER_ERROR.ANDROID_FAILED_PACK_INTENT));
+                EventBus.getDefault().post(new PlatformErrorEvent(PERIMETER_ERROR.ANDROID_FAILED_PACK_INTENT));
             }
 
             fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent,

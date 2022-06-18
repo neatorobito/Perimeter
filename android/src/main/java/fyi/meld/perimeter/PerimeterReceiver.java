@@ -2,6 +2,8 @@
 
 package fyi.meld.perimeter;
 
+import static fyi.meld.perimeter.Constants.*;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -41,23 +43,23 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
         if (geofencingEvent.hasError()) {
             int errorCode = geofencingEvent.getErrorCode();
             String errorMessage = GoogleApiAvailabilityLight.getInstance().getErrorString(errorCode);
-            Log.e(Constants.PERIMETER_TAG, "There was an error while processing a fence trigger event. Error details: " +  errorMessage);
+            Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(PERIMETER_ERROR.GENERIC_PLATFORM_ERROR));
             onError(context, errorCode, errorMessage);
             EventBus.getDefault().post(new PerimeterPlugin.PlatformErrorEvent(errorCode, errorMessage));
             return;
         }
 
         List<Geofence> triggeredFences = geofencingEvent.getTriggeringGeofences();
-        JSONArray fencesActiveWhileAdded = PerimeterPlugin.parseIntentExtras(intent);
+        JSONArray fencesActiveWhileAdded = null;
 
-        if(triggeredFences.size() > 0)
-        {
-            long triggeringTime = geofencingEvent.getTriggeringLocation().getTime();
-            int transitionType = geofencingEvent.getGeofenceTransition();
-            ArrayList<JSObject> triggeredJSObj = new ArrayList<JSObject>();
+        try {
+            if(triggeredFences.size() > 0) {
+                fencesActiveWhileAdded = new JSONArray(intent.getStringExtra(Constants.ALL_ACTIVE_FENCES_EXTRA));
 
-            try
-            {
+                long triggeringTime = geofencingEvent.getTriggeringLocation().getTime();
+                int transitionType = geofencingEvent.getGeofenceTransition();
+                ArrayList<JSObject> triggeredJSObj = new ArrayList<JSObject>();
+
                 for(int i = 0; i < fencesActiveWhileAdded.length(); i++)
                 {
                     for(int k = 0; k < triggeredFences.size(); k++)
@@ -67,18 +69,20 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
                         if(jsonFence.getString("uid").equals(triggeredFences.get(k).getRequestId()))
                         {
                             triggeredJSObj.add(jsonFence);
-                            Log.d(Constants.PERIMETER_TAG, "Fence event was successfully triggered for " + triggeredFences.get(k).getRequestId() + ".");
+                            Log.d(PERIMETER_TAG, "Fence event was successfully triggered for " + triggeredFences.get(k).getRequestId() + ".");
                         }
                     }
                 }
-            }
-            catch(JSONException e)
-            {
-                Log.d(Constants.PERIMETER_TAG, "Failed to parse intent extras while reconciling triggered and available.");
-            }
 
-            onFenceTriggered(context, triggeredJSObj, triggeringTime, transitionType);
-            EventBus.getDefault().post(new PerimeterPlugin.FenceEvent(triggeredJSObj, triggeringTime, transitionType));
+                onFenceTriggered(context, triggeredJSObj, triggeringTime, transitionType);
+                EventBus.getDefault().post(new PerimeterPlugin.FenceEvent(triggeredJSObj, triggeringTime, transitionType));
+            }
+        }
+        catch (JSONException e)
+        {
+            PerimeterPlugin.PlatformErrorEvent parsingError = new PerimeterPlugin.PlatformErrorEvent(PERIMETER_ERROR.ANDROID_FAILED_PARSING_INTENT_EXTRAS);
+            Log.e(PERIMETER_TAG, parsingError.errorMessage);
+            EventBus.getDefault().post(parsingError);
         }
     }
 }

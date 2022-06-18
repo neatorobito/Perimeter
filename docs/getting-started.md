@@ -1,6 +1,6 @@
 # Perimeter
 
-This API is a simple, straightforward, and robust way to do geofencing on iOS and Android. 
+This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
 
 ### Installing Perimeter
 
@@ -90,23 +90,21 @@ Next, create a `Fence` object covering a given region.
 ```javascript
 let extraData = "I want to visit this place someday.";
 let newFence : Fence = {
-name : "Taj Mahal",
-uid : '123456789',
-payload: extraData,
-lat : 27.1751,
-lng : 78.0421,
-radius : 200, 
-monitor : TransitionType.Enter
+    name : "Taj Mahal",
+    uid : '123456789',
+    payload: extraData,
+    lat : 27.1751,
+    lng : 78.0421,
+    radius : 200, 
+    monitor : TransitionType.Enter
 };
 
-try {
-    Perimeter.addFence(newFence);
+Perimeter.addFence(newFence).then(() => {
     this.activeFences.push(newFence);
-}
-catch(e) {
-    "We were able to catch the reject call."
+})
+    .catch((e) => {
     console.log(e);
-}
+});
 ```
 
 The name, UID, latitude, and longitude fields are self explanatory. For the other fields:
@@ -122,7 +120,7 @@ When the user enters and/or exits the region, you'll get a `FenceEvent` that loo
 FenceEvent {
     fence : Fence{},
     time : 'Trigger time in milliseconds',
-    transitionType : 'TransitionType.Enter or TransitionType.Exit'
+    transitionType : 'The type of action that triggered this event (enter or exit).'
 };
 ```
 
