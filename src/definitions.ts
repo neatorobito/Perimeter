@@ -88,6 +88,7 @@ export const enum TransitionType {
 }
 
 export const enum PerimeterError {
+  GEOFENCING_UNAVAILABLE,
   CLIENT_UNINITIALIZED,
   GENERIC_PLATFORM_ERROR,
   INCORRECT_PERMISSIONS,

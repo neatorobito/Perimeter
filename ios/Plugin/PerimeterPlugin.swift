@@ -97,30 +97,30 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     @objc func addFence(_ call: CAPPluginCall ) {
         if (!CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self)) {
             // Make sure the device supports region monitoring.
-            call.reject("This device does not support region monitoring.");
-            return
-        }
-        else if(!(call.hasOption("name") &&
-            call.hasOption("uid") &&
-            call.hasOption("payload") &&
-            call.hasOption("lat") &&
-            call.hasOption("lng") &&
-            call.hasOption("radius") &&
-            call.hasOption("monitor"))) {
-            
-            call.reject("Please provide a valid fence object.");
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.GEOFENCING_UNAVAILABLE]!);
             return
         }
         else if(lastStatus != .authorizedAlways)
         {
-            call.reject("Failed to add a fence, please double check your location permissions.");
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INCORRECT_PERMISSIONS]!);
+            return
+        }
+        else if((call.getString("name") == nil) ||
+            (call.getString("uid") == nil) ||
+            (call.getString("payload") == nil) ||
+            (call.getDouble("lat") == nil) ||
+            (call.getDouble("lng") == nil) ||
+            (call.getInt("radius") == nil) ||
+            call.getInt("monitor") == nil) {
+            
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INVALID_FENCE_OBJ]!);
             return
         }
         
         for fence in activeFences {
             if((fence.data["uid"] as! String) == call.getString("uid") ||
                ((fence.data["lat"] as! Double) == call.getDouble("lat") && (fence.data["lat"] as! Double) == call.getDouble("lng"))) {
-                call.reject("A region with the specified UID or coordinates is already fenced.");
+                call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.ALREADY_FENCED]!);
                 return;
             }
         }
@@ -150,20 +150,19 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     }
     
     @objc func removeFence(_ call: CAPPluginCall ) {
-        
-        if(call.getString("fenceUID") == nil)
-        {
-            call.reject("Please provide the identifier of a fence to remove.");
-            return
-        }
-        else if (!CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self)) {
+        if (!CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self)) {
             // Make sure the device supports region monitoring.
-            call.reject("This device does not support region monitoring.");
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.GEOFENCING_UNAVAILABLE]!);
             return
         }
         else if(lastStatus != .authorizedAlways)
         {
-            call.reject("Failed to add a fence, please double check your location permissions.");
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INCORRECT_PERMISSIONS]!);
+            return
+        }
+        if(call.getString("fenceUID") == nil)
+        {
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.NO_OR_INVALID_ARGS]!);
             return
         }
         else if(activeFences.capacity <= 0)
@@ -185,18 +184,25 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         }
         else
         {
-            call.reject("A fence was not found with that identifier.");
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.FENCE_NOT_FOUND]!);
         }
     }
     
     @objc func removeAllFences(_ call: CAPPluginCall ) {
+        
+        if(activeFences.capacity <= 0)
+        {
+            call.resolve()
+            print("There are no active fences.")
+            return
+        }
         
         for (index, fence) in activeFences.enumerated() {
             locationManager.stopMonitoring(for: fence.region)
             activeFences.remove(at: index)
         }
         
-        call.resolve([:])
+        call.resolve()
         print("Successfully removed all fences.")
     }
     

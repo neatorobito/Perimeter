@@ -22,6 +22,7 @@ public final class Constants {
     }
 
     public enum PERIMETER_ERROR {
+        GEOFENCING_UNAVAILABLE,
         CLIENT_UNINITIALIZED,
         GENERIC_PLATFORM_ERROR,
         INCORRECT_PERMISSIONS,
@@ -36,6 +37,7 @@ public final class Constants {
     }
 
     public static final Map<PERIMETER_ERROR, String> ERROR_MESSAGES = new HashMap<PERIMETER_ERROR, String>() {{
+        put(PERIMETER_ERROR.CLIENT_UNINITIALIZED, "This device does not support geofencing.");
         put(PERIMETER_ERROR.CLIENT_UNINITIALIZED, "Geofencing client has not been initialized, this should happen automatically after permissions are granted. Try requesting permissions again.");
         put(PERIMETER_ERROR.GENERIC_PLATFORM_ERROR, "A platform specific error has occurred.");
         put(PERIMETER_ERROR.INCORRECT_PERMISSIONS, "Perimeter does not have any of the required location permissions.");
