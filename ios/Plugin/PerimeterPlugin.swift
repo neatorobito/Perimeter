@@ -147,6 +147,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         print(call.options.description)
          
         locationManager.startMonitoring(for: newRegion)
+        call.resolve()
     }
     
     @objc func removeFence(_ call: CAPPluginCall ) {
