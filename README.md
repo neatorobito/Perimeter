@@ -150,7 +150,7 @@ Remove all geofencing event listeners
 ### getActiveFences()
 
 ```typescript
-getActiveFences() => Promise<{ "data": Array<Fence>; }>
+getActiveFences() => Promise<{ data: Array<Fence>; }>
 ```
 
 Returns a list of all regions currently being monitored.

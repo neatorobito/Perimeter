@@ -1,6 +1,6 @@
 // Copyright Mark Raymond Jr., All Rights Reserved. 2022
 import type { PluginListenerHandle } from '@capacitor/core';
-import { AndroidPlatformEvents, iOSPlatformEvents, TransitionTypes } from './enums';
+import { AndroidPlatformEvents, iOSPlatformEvents, PerimeterErrors, TransitionTypes } from './enums';
 
 export interface PerimeterPlugin {
 
@@ -52,7 +52,7 @@ export interface PerimeterPlugin {
   /**
    * Returns a list of all regions currently being monitored.
    */
-  getActiveFences(): Promise<{ "data" : Array<Fence> }>
+  getActiveFences(): Promise<{ data : Array<Fence> }>
 }
 
 export class Fence {
@@ -77,7 +77,7 @@ export class FenceEvent
 export class PlatformEvent
 {
   constructor (
-    public code : iOSPlatformEvents | AndroidPlatformEvents,
+    public code : iOSPlatformEvents | AndroidPlatformEvents | PerimeterErrors,
     public message? : string,
     public data? : any ) {}
 }

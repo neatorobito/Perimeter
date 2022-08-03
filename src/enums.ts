@@ -1,5 +1,5 @@
 export enum TransitionTypes {
-    Enter,
+    Enter = 1,
     Exit,
     Both
   }
@@ -21,5 +21,7 @@ export enum iOSPlatformEvents {
 }
 
 export enum AndroidPlatformEvents {
-    TEST_EVENT = 200
+    ANDROID_FAILED_PARSING_INTENT_EXTRAS = 200,
+    ANDROID_METHOD_UNAVAILABLE_API_VER,
+    ANDROID_FAILED_PACK_INTENT
 }

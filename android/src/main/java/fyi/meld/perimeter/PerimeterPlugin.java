@@ -60,27 +60,36 @@ public final class PerimeterPlugin extends Plugin {
     public static class FenceEvent {
         JSArray fences;
         long time;
-        int monitor;
+        int transitionType;
 
-        public FenceEvent(ArrayList<JSObject> fences, long time, int monitor) {
+        public FenceEvent(ArrayList<JSObject> fences, long time, int transitionType) {
             this.fences = new JSArray(fences);
             this.time = time;
-            this.monitor = monitor;
+            this.transitionType = transitionType;
         }
     }
 
-    public static class PlatformErrorEvent {
-        int errorCode;
-        String errorMessage;
+    public static class PlatformEvent {
+        int code;
+        String message;
+        JSObject data;
 
-        public PlatformErrorEvent(int errorCode, String errorMessage) {
-            this.errorCode = errorCode;
-            this.errorMessage = errorMessage;
+        public PlatformEvent(int code, String message, JSObject data) {
+            this.code = code;
+            this.message = message;
+            this.data = data == null ? new JSObject() : data;
         }
 
-        public PlatformErrorEvent(PERIMETER_ERROR perimeterErrorCode) {
-            this.errorCode = perimeterErrorCode.ordinal();
-            this.errorMessage = ERROR_MESSAGES.get(this.errorCode);
+        public PlatformEvent(PERIMETER_ERROR perimeterErrorCode) {
+            this.code = perimeterErrorCode.ordinal();
+            this.message = ERROR_MESSAGES.get(this.code);
+            this.data = new JSObject();
+        }
+
+        public PlatformEvent(ANDROID_PLATFORM_EVENT platformEvent, JSObject data) {
+            this.code = platformEvent.ordinal();
+            this.message = ERROR_MESSAGES.get(this.code);
+            this.data = data == null ? new JSObject() : data;
         }
     }
 
@@ -227,7 +236,7 @@ public final class PerimeterPlugin extends Plugin {
                 call.getDouble("lng"),
                 call.getFloat("radius"),
                 Geofence.NEVER_EXPIRE,
-                getConvertedTransitionType(preferredTransitionType)
+                preferredTransitionType.getValue() | Geofence.GEOFENCE_TRANSITION_DWELL
         );
 
         activeFences.add(call.getData());
@@ -323,26 +332,12 @@ public final class PerimeterPlugin extends Plugin {
         Log.d(PERIMETER_TAG, "Successfully removed all fences.");
     }
 
-    private int getConvertedTransitionType(TRANSITION_TYPE transitionTypes)
+    @PluginMethod()
+    public void getActiveFences(PluginCall call)
     {
-        int preferredTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT;
-
-        switch (transitionTypes)
-        {
-            case ENTER:
-                preferredTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER;
-                break;
-
-            case EXIT:
-                preferredTransitionType = Geofence.GEOFENCE_TRANSITION_EXIT;
-                break;
-
-            case BOTH:
-                preferredTransitionType = Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT;
-                break;
-        }
-
-        return preferredTransitionType;
+        JSObject activeFenceDict = new JSObject();
+        activeFenceDict.put("fences", activeFences);
+        call.resolve(activeFenceDict);
     }
 
     private Geofence buildNewFence(String identifier, String type, double lat, double lang, float radiusInMeters, long expirationInMillis, int transitionTypes) {
@@ -359,9 +354,11 @@ public final class PerimeterPlugin extends Plugin {
             // Set the expiration duration of the geofence.
             .setExpirationDuration(expirationInMillis)
 
+            //TODO Functionality : Loiter delay and expiration should be set by API consumers.
+            .setLoiteringDelay(STANDARD_GEOFENCE_DWELL_DELAY_MILLISECONDS)
+
             // Set the transition types we're interested in.
-            // We track entry and dwell(pause) transitions.
-            //TODO Functionality : Transition types should be set by arguments to the function call so that we can support multiple types of transitions.
+            // We track entry, exit, and dwell(pause) transitions.
             .setTransitionTypes(transitionTypes)
 
             .build();
@@ -379,8 +376,8 @@ public final class PerimeterPlugin extends Plugin {
             }
             catch(JSONException e)
             {
-                Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(PERIMETER_ERROR.ANDROID_FAILED_PACK_INTENT));
-                EventBus.getDefault().post(new PlatformErrorEvent(PERIMETER_ERROR.ANDROID_FAILED_PACK_INTENT));
+                Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PACK_INTENT.getValue()));
+                EventBus.getDefault().post(new PlatformEvent(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PACK_INTENT, null));
             }
 
             fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent,
@@ -415,18 +412,19 @@ public final class PerimeterPlugin extends Plugin {
 
         fenceEventJS.put("fences", event.fences);
         fenceEventJS.put("time", event.time);
-        fenceEventJS.put("monitor", event.monitor);
+        fenceEventJS.put("transitionType", event.transitionType);
 
         notifyListeners("FenceEvent", fenceEventJS);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPlatformErrorEvent(PlatformErrorEvent event) {
+    public void onPlatformEvent(PlatformEvent event) {
         JSObject errorEvent = new JSObject();
 
-        errorEvent.put("errorCode", event.errorCode);
-        errorEvent.put("errorMessage", event.errorMessage);
+        errorEvent.put("code", event.code);
+        errorEvent.put("message", event.message);
+        errorEvent.put("data", new JSObject());
 
-        notifyListeners("PlatformErrorEvent", errorEvent);
+        notifyListeners("PlatformEvent", errorEvent);
     }
 }

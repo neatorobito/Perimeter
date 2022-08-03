@@ -12,7 +12,7 @@ struct Constants {
     struct Perimeter {
         
         enum TransitionType : Int {
-            case Enter = 0, Exit, Both
+            case Enter = 1, Exit, Both
         }
         
         enum IOS_PLATFORM_EVENT : Int {

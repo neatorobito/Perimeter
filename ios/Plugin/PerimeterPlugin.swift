@@ -325,7 +325,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             print("Fence event triggered for " + triggeredRegion.identifier);
             let fenceEventDict = ["fences": [resolvedFence!.data],
                                   "time" : triggerTime,
-                                  "monitor" : eventType.rawValue ] as [String : Any]
+                                  "transitionType" : eventType.rawValue ] as [String : Any]
             
             notifyListeners("FenceEvent", data: fenceEventDict)
         }

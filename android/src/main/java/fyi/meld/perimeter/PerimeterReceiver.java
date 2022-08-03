@@ -4,18 +4,10 @@ package fyi.meld.perimeter;
 
 import static fyi.meld.perimeter.Constants.*;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
-
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 import com.getcapacitor.JSObject;
 import com.google.android.gms.common.GoogleApiAvailabilityLight;
@@ -45,7 +37,7 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
             String errorMessage = GoogleApiAvailabilityLight.getInstance().getErrorString(errorCode);
             Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(PERIMETER_ERROR.GENERIC_PLATFORM_ERROR));
             onError(context, errorCode, errorMessage);
-            EventBus.getDefault().post(new PerimeterPlugin.PlatformErrorEvent(errorCode, errorMessage));
+            EventBus.getDefault().post(new PerimeterPlugin.PlatformEvent(errorCode, errorMessage, null));
             return;
         }
 
@@ -73,15 +65,15 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
                         }
                     }
                 }
-
+                Log.d(PERIMETER_TAG, "TRANSITION TYPE" + transitionType);
                 onFenceTriggered(context, triggeredJSObj, triggeringTime, transitionType);
                 EventBus.getDefault().post(new PerimeterPlugin.FenceEvent(triggeredJSObj, triggeringTime, transitionType));
             }
         }
         catch (JSONException e)
         {
-            PerimeterPlugin.PlatformErrorEvent parsingError = new PerimeterPlugin.PlatformErrorEvent(PERIMETER_ERROR.ANDROID_FAILED_PARSING_INTENT_EXTRAS);
-            Log.e(PERIMETER_TAG, parsingError.errorMessage);
+            PerimeterPlugin.PlatformEvent parsingError = new PerimeterPlugin.PlatformEvent(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PARSING_INTENT_EXTRAS, null);
+            Log.e(PERIMETER_TAG, parsingError.message);
             EventBus.getDefault().post(parsingError);
         }
     }

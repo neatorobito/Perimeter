@@ -23,5 +23,5 @@ export class PerimeterWeb extends WebPlugin implements PerimeterPlugin {
   removeFence(_options: { fenceUID: string }): Promise<void> { throw this.unimplemented(errorMessage);  }
   removeAllFences(): Promise<void> { throw this.unimplemented(errorMessage); }
   removeAllListeners(): Promise<void> { throw this.unimplemented(errorMessage); }
-  getActiveFences(): Promise<{ "data" : Array<Fence> }> { throw this.unimplemented(errorMessage); }
+  getActiveFences(): Promise<{ data : Array<Fence> }> { throw this.unimplemented(errorMessage); }
 }
