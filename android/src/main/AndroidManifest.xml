@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="fyi.meld.perimeter">
+    package="fyi.karm.perimeter">
 
     <!-- Geolocation API (Add these to your AndroidManifest.xml) -->
     <!--    <uses-feature android:name="android.hardware.location.gps" />-->
