@@ -1,7 +1,7 @@
 export enum TransitionTypes {
     Enter = 1,
-    Exit,
-    Both
+    Exit = 2,
+    Both = 4
   }
   
 export enum PerimeterErrors {

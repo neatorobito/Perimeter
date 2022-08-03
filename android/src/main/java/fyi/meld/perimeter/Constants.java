@@ -18,7 +18,7 @@ public final class Constants {
     public enum TRANSITION_TYPE {
         ENTER(1),
         EXIT(2),
-        BOTH(3);
+        BOTH(4);
 
         private final int id;
         TRANSITION_TYPE(int id) { this.id = id; }

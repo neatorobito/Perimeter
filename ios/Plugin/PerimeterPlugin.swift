@@ -46,14 +46,17 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     
     @objc func handleWillGainForeground(notif: Notification) {
         
-        let jsonFences = defaults.array(forKey: "activeFencesJSON")
+        // Get the saved fences from WillResignActive notification.
+        let jsonFences = defaults.array(forKey: "activeFencesJSON") as? [Dictionary<String, Any>]
         let systemFences = locationManager.monitoredRegions
 
         var reconciledFences: [PlatformFences] = []
         
+        // Compare to what is being monitored by CLLocationManger.
+
         if(jsonFences != nil && !jsonFences!.isEmpty) {
             for fenceFromSystem in systemFences {
-                for case let fenceFromSaved as Dictionary<String, Any> in jsonFences! {
+                for (_, fenceFromSaved) in jsonFences!.enumerated() {
                     
                     if(fenceFromSystem.identifier == fenceFromSaved["uid"]! as! String) {
                         reconciledFences.append(PlatformFences(region: fenceFromSystem as! CLCircularRegion, data: fenceFromSaved))
@@ -62,12 +65,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             }
         }
         
-//        print(activeFences)
-//        print(systemFences)
-//        print(jsonFences)
-//
-        // Compare to what is being monitored by CLLocationManger.
-        // Reconcile, using activeFences as sole source of truth.
+        // Reconcile, using systemFences as sole source of truth.
         
         if(!reconciledFences.isEmpty) {
             

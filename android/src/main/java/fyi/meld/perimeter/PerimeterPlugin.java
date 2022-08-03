@@ -227,8 +227,6 @@ public final class PerimeterPlugin extends Plugin {
             }
         }
 
-        TRANSITION_TYPE preferredTransitionType = TRANSITION_TYPE.values()[call.getInt("monitor")];
-
         Geofence newFence = buildNewFence(
                 call.getString("uid"),
                 call.getString("payload"),
@@ -236,7 +234,7 @@ public final class PerimeterPlugin extends Plugin {
                 call.getDouble("lng"),
                 call.getFloat("radius"),
                 Geofence.NEVER_EXPIRE,
-                preferredTransitionType.getValue() | Geofence.GEOFENCE_TRANSITION_DWELL
+                call.getInt("monitor")
         );
 
         activeFences.add(call.getData());
@@ -355,7 +353,7 @@ public final class PerimeterPlugin extends Plugin {
             .setExpirationDuration(expirationInMillis)
 
             //TODO Functionality : Loiter delay and expiration should be set by API consumers.
-            .setLoiteringDelay(STANDARD_GEOFENCE_DWELL_DELAY_MILLISECONDS)
+//            .setLoiteringDelay(STANDARD_GEOFENCE_DWELL_DELAY_MILLISECONDS)
 
             // Set the transition types we're interested in.
             // We track entry, exit, and dwell(pause) transitions.
