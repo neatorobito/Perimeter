@@ -7,5 +7,18 @@ const Perimeter = registerPlugin<PerimeterPlugin>('Perimeter', {
   web: () => import('./web').then(m => new m.PerimeterWeb()),
 });
 
-export { Fence, FenceEvent, PlatformErrorEvent, PerimeterEvent, LocationPermissionStatus, TransitionType } from './definitions';
+export {
+  LocationPermissionStatus,
+  Fence,
+  FenceEvent,
+  PlatformEvent
+} from './definitions';
+
+export { 
+  TransitionTypes,
+  PerimeterErrors,
+  iOSPlatformEvents,
+  AndroidPlatformEvents
+} from './enums'
+
 export { Perimeter };

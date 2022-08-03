@@ -1,5 +1,6 @@
 // Copyright Mark Raymond Jr., All Rights Reserved. 2022
 import type { PluginListenerHandle } from '@capacitor/core';
+import { AndroidPlatformEvents, iOSPlatformEvents, TransitionTypes } from './enums';
 
 export interface PerimeterPlugin {
 
@@ -41,12 +42,17 @@ export interface PerimeterPlugin {
   /**
    * Add an event listener for geofencing or platform specific error events.
    */
-  addListener( eventName: string, listenerFunc: (data: PerimeterEvent) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
+  addListener( eventName: string, listenerFunc: (event: any) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
   
   /**
    * Remove all geofencing event listeners
    */
   removeAllListeners(): Promise<void>;
+  
+  /**
+   * Returns a list of all regions currently being monitored.
+   */
+  getActiveFences(): Promise<{ "data" : Array<Fence> }>
 }
 
 export class Fence {
@@ -57,7 +63,7 @@ export class Fence {
     public lat : number,
     public lng : number,
     public radius : number,
-    public monitor : TransitionType ) {}
+    public monitor : TransitionTypes ) {}
 }
 
 export class FenceEvent
@@ -65,14 +71,15 @@ export class FenceEvent
   constructor (
     public fences : Array<Fence>,
     public time : number,
-    public transitionType : TransitionType ) {}
+    public transitionType : TransitionTypes ) {}
 }
 
-export class PlatformErrorEvent
+export class PlatformEvent
 {
   constructor (
-    public code : number,
-    public message : string ) {}
+    public code : iOSPlatformEvents | AndroidPlatformEvents,
+    public message? : string,
+    public data? : any ) {}
 }
 
 export class LocationPermissionStatus {
@@ -80,23 +87,3 @@ export class LocationPermissionStatus {
     public foreground: PermissionState = "prompt",
     public background: PermissionState = "prompt") {}
 }
-
-export const enum TransitionType {
-  Enter,
-  Exit,
-  Both
-}
-
-export const enum PerimeterError {
-  GEOFENCING_UNAVAILABLE,
-  CLIENT_UNINITIALIZED,
-  GENERIC_PLATFORM_ERROR,
-  INCORRECT_PERMISSIONS,
-  FOREGROUND_DENIED,
-  INVALID_FENCE_OBJ,
-  ALREADY_FENCED,
-  NO_OR_INVALID_ARGS,
-  FENCE_NOT_FOUND,
-}
-
-export type PerimeterEvent = FenceEvent | PlatformErrorEvent;

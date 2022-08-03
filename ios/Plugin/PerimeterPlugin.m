@@ -13,4 +13,5 @@ CAP_PLUGIN(PerimeterPlugin, "Perimeter",
            CAP_PLUGIN_METHOD(addFence, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(removeFence, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(removeAllFences, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(getActiveFences, CAPPluginReturnPromise);
            )

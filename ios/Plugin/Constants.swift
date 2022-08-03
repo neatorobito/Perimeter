@@ -15,6 +15,10 @@ struct Constants {
             case Enter = 0, Exit, Both
         }
         
+        enum IOS_PLATFORM_EVENT : Int {
+            case FOREGROUND_WITH_EXISTING_FENCES = 100
+        }
+        
         enum ERROR : Int {
             case GEOFENCING_UNAVAILABLE = 0,
             CLIENT_UNINITIALIZED,

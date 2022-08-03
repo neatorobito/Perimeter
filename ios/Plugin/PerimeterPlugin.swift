@@ -10,17 +10,83 @@ import Capacitor
  */
 @objc(PerimeterPlugin)
 public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
-    
-    struct PerimeterFence
+
+    struct PlatformFences
     {
         let region : CLCircularRegion
-        let data : Dictionary<AnyHashable, Any>
+        let data : Dictionary<String, Any>
     }
     
+    let defaults = UserDefaults.standard
+    let notificationCenter = NotificationCenter.default
     let locationManager = CLLocationManager()
     var permsCallId : String?
     var lastStatus : CLAuthorizationStatus = .notDetermined
-    var activeFences = [PerimeterFence]()
+    var activeFences = [PlatformFences]()
+    
+    public override func load() {
+        super.load()
+        notificationCenter.addObserver(self, selector: #selector(handleWillResignForeground), name: UIApplication.willTerminateNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(handleWillResignForeground), name: UIApplication.willResignActiveNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(handleWillGainForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(handleWillGainForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+    
+    @objc func handleWillResignForeground(notif: Notification) {
+        print("App resigning to background")
+
+        var jsonFences: [Dictionary<AnyHashable, Any>] = []
+        
+        for fence in activeFences {
+            jsonFences.append(fence.data)
+        }
+        
+        defaults.set(jsonFences, forKey: "activeFencesJSON")
+    }
+    
+    @objc func handleWillGainForeground(notif: Notification) {
+        
+        let jsonFences = defaults.array(forKey: "activeFencesJSON")
+        let systemFences = locationManager.monitoredRegions
+
+        var reconciledFences: [PlatformFences] = []
+        
+        if(jsonFences != nil && !jsonFences!.isEmpty) {
+            for fenceFromSystem in systemFences {
+                for case let fenceFromSaved as Dictionary<String, Any> in jsonFences! {
+                    
+                    if(fenceFromSystem.identifier == fenceFromSaved["uid"]! as! String) {
+                        reconciledFences.append(PlatformFences(region: fenceFromSystem as! CLCircularRegion, data: fenceFromSaved))
+                    }
+                }
+            }
+        }
+        
+//        print(activeFences)
+//        print(systemFences)
+//        print(jsonFences)
+//
+        // Compare to what is being monitored by CLLocationManger.
+        // Reconcile, using activeFences as sole source of truth.
+        
+        if(!reconciledFences.isEmpty) {
+            
+            print("Now loading existing fences from CoreLocation")
+            activeFences = reconciledFences
+            
+            let reconciledJSON = getJSONFences(platformFences: activeFences)
+            
+            let platformEventDict = [
+                "data" : reconciledJSON,
+                "code" : Constants.Perimeter.IOS_PLATFORM_EVENT.FOREGROUND_WITH_EXISTING_FENCES.rawValue,
+                "message" : ""
+            ] as [String : Any]
+            
+            print(platformEventDict)
+            
+            notifyListeners("PlatformEvent", data: platformEventDict, retainUntilConsumed: true)
+        }
+    }
     
     @objc public override func checkPermissions(_ call: CAPPluginCall) {
         var foreground = "prompt"
@@ -138,9 +204,9 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         newRegion.notifyOnExit = (transitionType == Constants.Perimeter.TransitionType.Exit ||
                                 transitionType == Constants.Perimeter.TransitionType.Both) ? true : false;
 
-        let newFlockFence = PerimeterFence(
+        let newFlockFence = PlatformFences(
             region: newRegion,
-            data: call.options!
+            data: call.options! as! Dictionary<String, Any>
         )
         
         activeFences.append(newFlockFence)
@@ -207,9 +273,26 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         print("Successfully removed all fences.")
     }
     
-    func getFenceByUID(uid : String) -> (Int, PerimeterFence?)
+    @objc func getActiveFences(_ call: CAPPluginCall ) {
+        
+        let activeFencesJSON = getJSONFences(platformFences: activeFences)
+        
+        call.resolve(["fences" : activeFencesJSON])
+    }
+    
+    func getJSONFences(platformFences : [PlatformFences]) -> [[String : Any]] {
+        var jsonFences: [[String : Any]] = []
+        
+        for fence in platformFences {
+            jsonFences.append(fence.data)
+        }
+        
+        return jsonFences
+    }
+    
+    func getFenceByUID(uid : String) -> (Int, PlatformFences?)
     {
-        var foundFence : PerimeterFence?
+        var foundFence : PlatformFences?
         var foundFenceIndex = -1
         
         for (index, fence) in activeFences.enumerated() {
@@ -231,7 +314,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         
         return String(data: data, encoding: String.Encoding.utf8)
     }
-        
+    
     func handleFenceEvent(triggeredRegion : CLCircularRegion, eventType : Constants.Perimeter.TransitionType)
     {
         let (resolvedFenceIndex, resolvedFence) = getFenceByUID(uid: triggeredRegion.identifier)
