@@ -17,6 +17,7 @@ struct Constants {
         
         enum IOS_PLATFORM_EVENT : Int {
             case FOREGROUND_WITH_EXISTING_FENCES = 100
+            case LOST_FENCES_TO_BACKGROUND
         }
         
         enum ERROR : Int {

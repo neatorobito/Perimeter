@@ -18,6 +18,7 @@ export enum PerimeterErrors {
 
 export enum iOSPlatformEvents {
     FOREGROUND_WITH_EXISTING_FENCES = 100,
+    LOST_FENCES_TO_BACKGROUND
 }
 
 export enum AndroidPlatformEvents {
