@@ -31,13 +31,13 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     }
     
     @objc func handleWillResignForeground(notif: Notification) {
-        print("App resigning to background")
+        print("Updating geofence store before resigning foreground.")
         updateFenceStore()
     }
     
     @objc func handleWillGainForeground(notif: Notification) {
         
-        // Get the saved fences from WillResignActive notification.
+        // Get the fences saved from WillResignActive notification.
         let jsonFences = defaults.array(forKey: "activeFencesJSON") as? [Dictionary<String, Any>]
         let systemFences = locationManager.monitoredRegions
 
@@ -63,7 +63,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             if(foundFence == nil) {
                 lostFencesUIDs.append(fenceFromSystem.identifier)
                 locationManager.stopMonitoring(for: fenceFromSystem)
-                print("Discarding orphaned fences.")
+                print("Pruning orphaned fences.")
             }
         }
         
@@ -74,11 +74,11 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             print("No orphaned fences.")
         }
         
-        // Reconcile.
+        // Reconcile and notify.
         
         if(!reconciledFences.isEmpty) {
             
-            print("Now loading existing fences from CoreLocation")
+            print("Now loading existing fences from geofence store.")
             activeFences = reconciledFences
             
             let reconciledJSON = getJSONFences(platformFences: activeFences)
