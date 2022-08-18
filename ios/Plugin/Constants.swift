@@ -11,6 +11,8 @@ struct Constants {
     
     struct Perimeter {
         
+        static let IOS_FENCE_LIMIT = 20
+        
         enum TransitionType : Int {
             case Enter = 1, Exit = 2, Both = 4 
         }
@@ -29,7 +31,8 @@ struct Constants {
             INVALID_FENCE_OBJ,
             ALREADY_FENCED,
             NO_OR_INVALID_ARGS,
-            FENCE_NOT_FOUND
+            FENCE_NOT_FOUND,
+            TOO_MANY_FENCES
         }
         
         static let ERROR_MESSAGES : [ERROR : String] = [
@@ -41,7 +44,8 @@ struct Constants {
             ERROR.INVALID_FENCE_OBJ : "Perimeter does not have any of the required location permissions.",
             ERROR.ALREADY_FENCED : "A region with the specified UID or coordinates is already fenced.",
             ERROR.NO_OR_INVALID_ARGS : "Invalid arguments for this function.",
-            ERROR.FENCE_NOT_FOUND : "A fence with that UID was not found in the list of active fences."
+            ERROR.FENCE_NOT_FOUND : "A fence with that UID was not found in the list of active fences.",
+            ERROR.TOO_MANY_FENCES : "Cannot exceed iOS platform limit of 20 fences. Please remove a region first and then try to add this one."
         ]
     }
 }

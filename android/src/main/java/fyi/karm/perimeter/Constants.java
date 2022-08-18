@@ -11,9 +11,9 @@ public final class Constants {
     public static final String FOREGROUND_ALIAS = "foreground";
     public static final String BACKGROUND_ALIAS = "background";
     public static final String CLIENT_INITIALIZED = "Geofencing client has been successfully initialized.";
-    public static final String CLIENT_UNINITIALIZED = "";
     public static final int STANDARD_GEOFENCE_RESPONSIVENESS_MILLISECONDS = 60000;
     public static final int STANDARD_GEOFENCE_DWELL_DELAY_MILLISECONDS = 60000;
+    public static final int ANDROID_FENCE_LIMIT = 100;
     public static final int LOCATIONS_PERMISSIONS_REQUEST_CODE = 206314;
     public enum TRANSITION_TYPE {
         ENTER(1),
@@ -34,7 +34,8 @@ public final class Constants {
         INVALID_FENCE_OBJ,
         ALREADY_FENCED,
         NO_OR_INVALID_ARGS,
-        FENCE_NOT_FOUND
+        FENCE_NOT_FOUND,
+        TOO_MANY_FENCES
     }
 
     public enum ANDROID_PLATFORM_EVENT {
@@ -57,6 +58,7 @@ public final class Constants {
         put(PERIMETER_ERROR.ALREADY_FENCED.ordinal(), "A region with the specified UID or coordinates is already fenced.");
         put(PERIMETER_ERROR.NO_OR_INVALID_ARGS.ordinal(), "Invalid arguments for this function.");
         put(PERIMETER_ERROR.FENCE_NOT_FOUND.ordinal(), "A fence with that UID was not found in the list of active fences.");
+        put(PERIMETER_ERROR.TOO_MANY_FENCES.ordinal(), "Cannot exceed Android platform limit of 100 fences. Please remove a region first and then try to add this one.");
         put(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PARSING_INTENT_EXTRAS.getValue(), "Failed to parse intent extras while reconciling triggered and available.");
         put(ANDROID_PLATFORM_EVENT.ANDROID_METHOD_UNAVAILABLE_API_VER.getValue(), "This method is only available on Android Q or later.");
         put(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PACK_INTENT.getValue(), "Failed to pack intent data while attempting to create a new fence.");

@@ -14,6 +14,7 @@ export enum PerimeterErrors {
     ALREADY_FENCED,
     NO_OR_INVALID_ARGS,
     FENCE_NOT_FOUND,
+    TOO_MANY_FENCES
 }
 
 export enum iOSPlatformEvents {

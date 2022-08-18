@@ -91,7 +91,7 @@ Next, create a `Fence` object covering a given region.
 let extraData = "I want to visit this place someday.";
 let newFence : Fence = {
     name : "Taj Mahal",
-    uid : '123456789',
+    uid : "123456789",
     payload: extraData,
     lat : 27.1751,
     lng : 78.0421,

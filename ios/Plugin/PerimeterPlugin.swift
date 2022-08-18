@@ -187,6 +187,10 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INVALID_FENCE_OBJ]!);
             return
         }
+        else if(activeFences.count >= Constants.Perimeter.IOS_FENCE_LIMIT) {
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.TOO_MANY_FENCES]!);
+            return
+        }
         
         for fence in activeFences {
             if((fence.data["uid"] as! String) == call.getString("uid") ||
@@ -366,7 +370,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     }
     
     public func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
-        // We must override didDetermineState initially to determine if the user is inside the region at that moment. didEnterRegion and didExitRegion are more about
+        // We must override didDetermineState initially to determine if the user is inside the region as locationManager is initialized.
         if let region = region as? CLCircularRegion {
             
             if(state == .inside)

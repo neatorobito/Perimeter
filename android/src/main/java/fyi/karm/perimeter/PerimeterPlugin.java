@@ -217,6 +217,10 @@ public final class PerimeterPlugin extends Plugin {
             call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.INVALID_FENCE_OBJ), PERIMETER_ERROR.INVALID_FENCE_OBJ.name());
             return;
         }
+        else if(activeFences.size() >= ANDROID_FENCE_LIMIT) {
+            call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.TOO_MANY_FENCES), PERIMETER_ERROR.TOO_MANY_FENCES.name());
+            return;
+        }
 
         for (JSONObject fence : activeFences) {
             if(fence.optString("uid").equals(call.getString("uid")) ||
