@@ -75,7 +75,7 @@ async requestPerms() : Promise<void> {
 
 Before you call `requestBackgroundPermissions` on Android, show a dialog to help users understand why the app needs their background location. **If you do not show this dialog, your app may be rejected in review.** For more information, see the following [developer docs.](https://developer.android.com/training/location/permissions#background-dialog-target-android-11)
 
-### Setting up a fence
+### Creating and monitoring geofences
 
 Start by setting up a listener for a `FenceEvent`:
 
@@ -98,13 +98,6 @@ let newFence : Fence = {
     radius : 200, 
     monitor : TransitionType.Enter
 };
-
-Perimeter.addFence(newFence).then(() => {
-    this.activeFences.push(newFence);
-})
-    .catch((e) => {
-    console.log(e);
-});
 ```
 
 The name, UID, latitude, and longitude fields are self explanatory. For the other fields:
@@ -115,6 +108,15 @@ The name, UID, latitude, and longitude fields are self explanatory. For the othe
 
 Finally, call `addFence(newFence)` to begin monitoring the region.
 
+```javascript
+Perimeter.addFence(newFence).then(() => {
+    this.activeFences.push(newFence);
+})
+    .catch((e) => {
+    console.log(e);
+});
+```
+
 When the user enters and/or exits the region, you'll get a `FenceEvent` that looks something like this:
 ```javascript
 FenceEvent {
@@ -122,6 +124,23 @@ FenceEvent {
     time : 'Trigger time in milliseconds',
     transitionType : 'The type of action that triggered this event (enter or exit)'
 };
+```
+
+To show a push notification on a FenceEvent install the `@capacitor/local-notifications` plugin.
+```javascript
+      Perimeter.addListener("FenceEvent", (event: any) => { 
+        let fenceEvent = (event as FenceEvent)
+        let fenceNames = ""
+        for(let fence of fenceEvent.fences) {
+          fenceNames += fence.name + ' '
+        }
+
+        LocalNotifications.schedule({ 
+          notifications : [{ 
+            id: 123,
+            title: 'Geofencing Event',
+            body : `Did you ${ fenceEvent.transitionType === TransitionTypes.Enter ? 'enter' : 'exit' } ${ fenceNames.trimEnd() }?`}]})
+      })
 ```
 
 ### Other important information
