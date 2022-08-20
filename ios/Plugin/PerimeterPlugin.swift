@@ -336,7 +336,11 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
         return String(data: data, encoding: String.Encoding.utf8)
     }
     
-    func handleFenceEvent(triggeredRegion : CLCircularRegion, eventType : Constants.Perimeter.TransitionType)
+    func handleFenceEvent(triggeredRegion : CLCircularRegion, eventType : Constants.Perimeter.TransitionType) {
+        // This method intentionally left blank for optional low-level platform control of FenceEvents.
+    }
+    
+    func notifyFenceEvent(triggeredRegion : CLCircularRegion, eventType : Constants.Perimeter.TransitionType)
     {
         let (resolvedFenceIndex, resolvedFence) = getFenceByUID(uid: triggeredRegion.identifier)
         let triggerTime = NSDate().timeIntervalSince1970
@@ -359,12 +363,14 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
     
     public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         if let region = region as? CLCircularRegion {
+            notifyFenceEvent(triggeredRegion: region, eventType: Constants.Perimeter.TransitionType.Enter)
             handleFenceEvent(triggeredRegion: region, eventType: Constants.Perimeter.TransitionType.Enter)
         }
     }
     
     public func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         if let region = region as? CLCircularRegion {
+            notifyFenceEvent(triggeredRegion: region, eventType: Constants.Perimeter.TransitionType.Exit)
             handleFenceEvent(triggeredRegion: region, eventType: Constants.Perimeter.TransitionType.Exit)
         }
     }
@@ -375,6 +381,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             
             if(state == .inside)
             {
+                notifyFenceEvent(triggeredRegion: region, eventType: Constants.Perimeter.TransitionType.Enter)
                 handleFenceEvent(triggeredRegion: region, eventType: Constants.Perimeter.TransitionType.Enter)
             }
         }
