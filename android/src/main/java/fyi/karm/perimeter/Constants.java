@@ -15,6 +15,9 @@ public final class Constants {
     public static final int STANDARD_GEOFENCE_DWELL_DELAY_MILLISECONDS = 60000;
     public static final int ANDROID_FENCE_LIMIT = 100;
     public static final int LOCATIONS_PERMISSIONS_REQUEST_CODE = 206314;
+    public static final int MIN_FENCE_RADIUS = 200;
+    public static final int MAX_FENCE_RADIUS = 2000;
+
     public enum TRANSITION_TYPE {
         ENTER(1),
         EXIT(2),
@@ -54,7 +57,7 @@ public final class Constants {
         put(PERIMETER_ERROR.GENERIC_PLATFORM_ERROR.ordinal(), "A platform specific error has occurred.");
         put(PERIMETER_ERROR.INCORRECT_PERMISSIONS.ordinal(), "Perimeter does not have any of the required location permissions.");
         put(PERIMETER_ERROR.FOREGROUND_DENIED.ordinal(), "This method requires foreground permissions from ACCESS_COARSE_LOCATION permissions first. Also ensure you've called Perimeter.requestForegroundPermissions before calling this method.");
-        put(PERIMETER_ERROR.INVALID_FENCE_OBJ.ordinal(), "Perimeter does not have any of the required location permissions.");
+        put(PERIMETER_ERROR.INVALID_FENCE_OBJ.ordinal(), "An invalid fence object was supplied.");
         put(PERIMETER_ERROR.ALREADY_FENCED.ordinal(), "A region with the specified UID or coordinates is already fenced.");
         put(PERIMETER_ERROR.NO_OR_INVALID_ARGS.ordinal(), "Invalid arguments for this function.");
         put(PERIMETER_ERROR.FENCE_NOT_FOUND.ordinal(), "A fence with that UID was not found in the list of active fences.");

@@ -177,20 +177,25 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             return
         }
         else if((call.getString("name") == nil) ||
-            (call.getString("uid") == nil) ||
-            (call.getString("payload") == nil) ||
-            (call.getDouble("lat") == nil) ||
-            (call.getDouble("lng") == nil) ||
-            (call.getInt("radius") == nil) ||
-            call.getInt("monitor") == nil) {
+                (call.getString("uid") == nil) ||
+                (call.getString("payload") == nil) ||
+                (call.getDouble("lat") == nil) ||
+                (call.getDouble("lng") == nil) ||
+                (call.getInt("radius") == nil) ||
+                call.getInt("monitor") == nil) {
             
             call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INVALID_FENCE_OBJ]!);
+            return
+        }
+        else if((call.getInt("radius")! <= Constants.Perimeter.MIN_FENCE_RADIUS) || (call.getInt("radius")! >= Constants.Perimeter.MAX_FENCE_RADIUS )) {
+            call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INVALID_FENCE_OBJ]!)
             return
         }
         else if(activeFences.count >= Constants.Perimeter.IOS_FENCE_LIMIT) {
             call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.TOO_MANY_FENCES]!);
             return
         }
+
         
         for fence in activeFences {
             if((fence.data["uid"] as! String) == call.getString("uid") ||

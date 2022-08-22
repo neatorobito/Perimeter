@@ -1,6 +1,6 @@
 {
   "name": "@karm/perimeter",
-  "version": "0.1.0",
+  "version": "0.9.4",
   "description": "Simple cross platform geofencing for Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -13,14 +13,14 @@
     "ios/Plugin/",
     "Perimeter.podspec"
   ],
-  "author": "Marvelous Electronic Design",
+  "author": "Mark Raymond Jr.",
   "license": "Proprietary",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neatorobito/Perimeter.git"
+    "url": "git+https://git.karm.fyi/bits/Perimeter.git"
   },
   "bugs": {
-    "url": "https://github.com/neatorobito/Perimeter/issues"
+    "url": "https://perimeter.karm.fyi/"
   },
   "keywords": [
     "capacitor",
@@ -74,6 +74,5 @@
     "android": {
       "src": "android"
     }
-  },
-  "publishConfig": { "registry": "https://r.privjs.com" }
+  }
 }
