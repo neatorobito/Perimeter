@@ -44,6 +44,7 @@ import java.util.ArrayList;
         permissions = {
                 @Permission (alias = FOREGROUND_ALIAS,
                         strings = {
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
                                 Manifest.permission.ACCESS_FINE_LOCATION,
                         }
                 ),
@@ -217,7 +218,7 @@ public final class PerimeterPlugin extends Plugin {
             call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.INVALID_FENCE_OBJ), PERIMETER_ERROR.INVALID_FENCE_OBJ.name());
             return;
         }
-        else if(call.getInt("radius") <= MIN_FENCE_RADIUS || call.getInt("radius") >= MAX_FENCE_RADIUS ) {
+        else if(MIN_FENCE_RADIUS <= call.getInt("radius") && call.getInt("radius") >= MAX_FENCE_RADIUS ) {
             call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.INVALID_FENCE_OBJ), PERIMETER_ERROR.INVALID_FENCE_OBJ.name());
             return;
         }
@@ -386,8 +387,11 @@ public final class PerimeterPlugin extends Plugin {
                 EventBus.getDefault().post(new PlatformEvent(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PACK_INTENT, null));
             }
 
-            fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+            } else {
+                fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
         }
 
         return fencePendingIntent;

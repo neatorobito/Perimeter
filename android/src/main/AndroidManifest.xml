@@ -4,7 +4,8 @@
     <!-- Geolocation API (Add these to your AndroidManifest.xml) -->
     <!--    <uses-feature android:name="android.hardware.location.gps" />-->
     <!--    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
-    
+    <!--    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
+
     <!--  For Android 10 and above you also need: -->
     <!--    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION " />-->
 

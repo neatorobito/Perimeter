@@ -62,7 +62,7 @@ async requestPerms() : Promise<void> {
 async requestPerms() : Promise<void> {
       this.permStatus = await Perimeter.checkPermissions();
     if(this.permStatus.foreground != "granted") {
-        this.permStatus = await 	Perimeter.requestForegroundPermissions();
+        this.permStatus = await Perimeter.requestForegroundPermissions();
     }
 
 	// Show your Android specific UI here.
