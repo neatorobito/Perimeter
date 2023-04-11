@@ -1,6 +1,6 @@
 {
   "name": "@karm/perimeter",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Simple cross platform geofencing for Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

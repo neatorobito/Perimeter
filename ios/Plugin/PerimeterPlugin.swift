@@ -187,7 +187,7 @@ public class PerimeterPlugin: CAPPlugin, CLLocationManagerDelegate {
             call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INVALID_FENCE_OBJ]!);
             return
         }
-        else if((call.getInt("radius")! <= Constants.Perimeter.MIN_FENCE_RADIUS) || (call.getInt("radius")! >= Constants.Perimeter.MAX_FENCE_RADIUS )) {
+        else if(!((call.getInt("radius")! >= Constants.Perimeter.MIN_FENCE_RADIUS) && (call.getInt("radius")! <= Constants.Perimeter.MAX_FENCE_RADIUS))) {
             call.reject(Constants.Perimeter.ERROR_MESSAGES[Constants.Perimeter.ERROR.INVALID_FENCE_OBJ]!)
             return
         }
