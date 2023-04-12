@@ -1,4 +1,4 @@
-# Software Source Code License Agreement
+# Perimeter Source Code License Agreement
 
 This Software Source Code License Agreement ("Agreement") is made and entered into between [Licensee], a [Licensee's country] entity ("Licensee"), and Mark Raymond Jr., a United States entity ("Licensor"). This Agreement is effective as of [Effective Date] (the "Effective Date").
 
@@ -42,10 +42,9 @@ Subject to the terms and conditions of this Agreement, Licensor grants to Licens
 
 Licensee shall not:
 
-- copy, modify, distribute, sell, or transfer the Software or any part thereof;
+- copy, modify, sell, or transfer the Software or any part thereof;
 - reverse engineer, decompile, or disassemble the Software;
 - remove any copyright, trademark, or other proprietary notices from the Software or the Documentation;
-- alter or remove any notices in or on the Software source code or within the Documentation included within the Software source code;
 - use the Software to create a product that competes with the Software;
 - use the Software for any unlawful purpose; or
 - use the Software in any manner not expressly authorized by this Agreement.
@@ -72,7 +71,7 @@ The Licensor shall not be liable for any damages, whether direct, indirect, inci
 
 ## 9. General Provisions
 
-(a) This Agreement shall be governed by and construed in accordance with the laws of [state/province/country].
+(a) This Agreement shall be governed by and construed in accordance with the laws of the United State of America.
 
 (b) This Agreement constitutes the entire agreement between the parties and supersedes all prior agreements, understandings, or negotiations, whether written or oral, with respect to the subject matter of this Agreement.
 
@@ -80,4 +79,4 @@ The Licensor shall not be liable for any damages, whether direct, indirect, inci
 
 (d) Any provision of this Agreement that is held to be invalid or unenforceable shall be severed, and the remaining provisions shall remain in full force and effect.
 
-(e) This Agreement is binding upon Customer's purchase of the Software and continues until terminated or the end of the license term.
+(e) This Agreement is binding upon Customer's purchase of the Software.
