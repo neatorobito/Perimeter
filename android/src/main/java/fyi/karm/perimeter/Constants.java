@@ -42,9 +42,9 @@ public final class Constants {
     }
 
     public enum ANDROID_PLATFORM_EVENT {
-        ANDROID_FAILED_PARSING_INTENT_EXTRAS(200),
-        ANDROID_METHOD_UNAVAILABLE_API_VER(201),
-        ANDROID_FAILED_PACK_INTENT(202);
+        FAILED_PARSING_INTENT_EXTRAS(200),
+        METHOD_UNAVAILABLE_API_VER(201),
+        FAILED_PACK_INTENT(202);
 
         private final int id;
         ANDROID_PLATFORM_EVENT(int id) { this.id = id; }
@@ -62,8 +62,8 @@ public final class Constants {
         put(PERIMETER_ERROR.NO_OR_INVALID_ARGS.ordinal(), "Invalid arguments for this function.");
         put(PERIMETER_ERROR.FENCE_NOT_FOUND.ordinal(), "A fence with that UID was not found in the list of active fences.");
         put(PERIMETER_ERROR.TOO_MANY_FENCES.ordinal(), "Cannot exceed Android platform limit of 100 fences. Please remove a region first and then try to add this one.");
-        put(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PARSING_INTENT_EXTRAS.getValue(), "Failed to parse intent extras while reconciling triggered and available.");
-        put(ANDROID_PLATFORM_EVENT.ANDROID_METHOD_UNAVAILABLE_API_VER.getValue(), "This method is only available on Android Q or later.");
-        put(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PACK_INTENT.getValue(), "Failed to pack intent data while attempting to create a new fence.");
+        put(ANDROID_PLATFORM_EVENT.FAILED_PARSING_INTENT_EXTRAS.getValue(), "Failed to parse intent extras while reconciling triggered and available.");
+        put(ANDROID_PLATFORM_EVENT.METHOD_UNAVAILABLE_API_VER.getValue(), "This method is only available on Android Q or later.");
+        put(ANDROID_PLATFORM_EVENT.FAILED_PACK_INTENT.getValue(), "Failed to pack intent data while attempting to create a new fence.");
     }};
 }

@@ -72,7 +72,7 @@ public abstract class PerimeterReceiver extends BroadcastReceiver {
         }
         catch (JSONException e)
         {
-            PerimeterPlugin.PlatformEvent parsingError = new PerimeterPlugin.PlatformEvent(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PARSING_INTENT_EXTRAS, null);
+            PerimeterPlugin.PlatformEvent parsingError = new PerimeterPlugin.PlatformEvent(ANDROID_PLATFORM_EVENT.FAILED_PARSING_INTENT_EXTRAS, null);
             Log.e(PERIMETER_TAG, parsingError.message);
             EventBus.getDefault().post(parsingError);
         }

@@ -383,8 +383,8 @@ public final class PerimeterPlugin extends Plugin {
             }
             catch(JSONException e)
             {
-                Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PACK_INTENT.getValue()));
-                EventBus.getDefault().post(new PlatformEvent(ANDROID_PLATFORM_EVENT.ANDROID_FAILED_PACK_INTENT, null));
+                Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(ANDROID_PLATFORM_EVENT.FAILED_PACK_INTENT.getValue()));
+                EventBus.getDefault().post(new PlatformEvent(ANDROID_PLATFORM_EVENT.FAILED_PACK_INTENT, null));
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

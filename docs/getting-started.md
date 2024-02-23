@@ -121,7 +121,7 @@ When the user enters and/or exits the region, you'll get a `FenceEvent` that loo
 ```javascript
 FenceEvent {
     fences : 'A list of fences that were triggered by a given action',
-    time : 'Trigger time in milliseconds',
+    time : 'Trigger time as a UNIX timestamp',
     transitionType : 'The type of action that triggered this event (enter or exit)'
 };
 ```
