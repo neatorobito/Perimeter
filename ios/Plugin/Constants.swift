@@ -16,7 +16,7 @@ struct Constants {
         static let MAX_FENCE_RADIUS = 2000
         
         enum TransitionType : Int {
-            case Enter = 1, Exit = 2, Both = 4 
+            case Enter = 8, Exit = 9, Both = 10 
         }
         
         enum IOS_PLATFORM_EVENT : Int {

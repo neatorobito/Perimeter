@@ -1,7 +1,7 @@
 export enum TransitionTypes {
-    Enter = 1,
-    Exit = 2,
-    Both = 4
+    Enter = 8,
+    Exit = 9,
+    Both = 10
   }
   
 export enum PerimeterErrors {
@@ -25,5 +25,7 @@ export enum iOSPlatformEvents {
 export enum AndroidPlatformEvents {
     FAILED_PARSING_INTENT_EXTRAS = 200,
     METHOD_UNAVAILABLE_API_VER,
-    FAILED_PACK_INTENT
+    FAILED_PACK_INTENT,
+    FAILED_RESTORING_FENCES,
+    FOREGROUND_WITH_EXISTING_FENCES
 }

@@ -1,6 +1,11 @@
 // Copyright Mark Raymond Jr. 2022. All Rights Reserved
 package fyi.karm.perimeter;
 
+import android.Manifest;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,15 +23,14 @@ public final class Constants {
     public static final int MIN_FENCE_RADIUS = 200;
     public static final int MAX_FENCE_RADIUS = 2000;
 
-    public enum TRANSITION_TYPE {
-        ENTER(1),
-        EXIT(2),
-        BOTH(4);
+    public static final int MONITOR_ENTER = 8;
+    public static final int MONITOR_EXIT = 9;
+    public static final int MONITOR_BOTH = 10;
 
-        private final int id;
-        TRANSITION_TYPE(int id) { this.id = id; }
-        public int getValue() { return id; }
-    }
+    public static String[] STANDARD_LOCATION_PERMISSIONS = new String[]{
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+    };
 
     public enum PERIMETER_ERROR {
         GEOFENCING_UNAVAILABLE,
@@ -44,8 +48,9 @@ public final class Constants {
     public enum ANDROID_PLATFORM_EVENT {
         FAILED_PARSING_INTENT_EXTRAS(200),
         METHOD_UNAVAILABLE_API_VER(201),
-        FAILED_PACK_INTENT(202);
-
+        FAILED_PACK_INTENT(202),
+        FAILED_RESTORING_FENCES(203),
+        FOREGROUND_WITH_EXISTING_FENCES(204);
         private final int id;
         ANDROID_PLATFORM_EVENT(int id) { this.id = id; }
         public int getValue() { return id; }
@@ -65,5 +70,6 @@ public final class Constants {
         put(ANDROID_PLATFORM_EVENT.FAILED_PARSING_INTENT_EXTRAS.getValue(), "Failed to parse intent extras while reconciling triggered and available.");
         put(ANDROID_PLATFORM_EVENT.METHOD_UNAVAILABLE_API_VER.getValue(), "This method is only available on Android Q or later.");
         put(ANDROID_PLATFORM_EVENT.FAILED_PACK_INTENT.getValue(), "Failed to pack intent data while attempting to create a new fence.");
+        put(ANDROID_PLATFORM_EVENT.FAILED_RESTORING_FENCES.getValue(), "An error occurred while attempting to restore fences from SharedPrefs.");
     }};
 }

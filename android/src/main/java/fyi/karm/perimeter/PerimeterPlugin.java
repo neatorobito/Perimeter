@@ -7,12 +7,15 @@ import static fyi.karm.perimeter.Constants.*;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Application;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.getcapacitor.JSArray;
@@ -73,11 +76,17 @@ public final class PerimeterPlugin extends Plugin {
     public static class PlatformEvent {
         int code;
         String message;
-        JSObject data;
+        Object data;
 
-        public PlatformEvent(int code, String message, JSObject data) {
+        public PlatformEvent(int code, String message, JSArray data) {
             this.code = code;
             this.message = message;
+            this.data = data == null ? new JSObject() : data;
+        }
+
+        public PlatformEvent(ANDROID_PLATFORM_EVENT platformEvent, JSObject data) {
+            this.code = platformEvent.ordinal();
+            this.message = ERROR_MESSAGES.get(this.code);
             this.data = data == null ? new JSObject() : data;
         }
 
@@ -85,12 +94,6 @@ public final class PerimeterPlugin extends Plugin {
             this.code = perimeterErrorCode.ordinal();
             this.message = ERROR_MESSAGES.get(this.code);
             this.data = new JSObject();
-        }
-
-        public PlatformEvent(ANDROID_PLATFORM_EVENT platformEvent, JSObject data) {
-            this.code = platformEvent.ordinal();
-            this.message = ERROR_MESSAGES.get(this.code);
-            this.data = data == null ? new JSObject() : data;
         }
     }
 
@@ -107,30 +110,25 @@ public final class PerimeterPlugin extends Plugin {
     @Override
     public void load() {
         super.load();
-        tryGetCustomReceiver();
-        tryInitClient();
+        tryGetCustomReceiver(getContext());
+        tryInitClient(getContext(), false);
     }
 
-    private void tryInitClient()
+    void tryInitClient(Context context, boolean isBoot)
     {
-        if(hasLocationPermissions() && geofencingClient == null)
+        boolean hasPermissions = isBoot ? hasLocationPermissionsAtBoot(context) : hasLocationPermissions();
+
+        if(hasPermissions && geofencingClient == null)
         {
-            geofencingClient = LocationServices.getGeofencingClient(getContext());
+            geofencingClient = LocationServices.getGeofencingClient(context);
             Log.d(PERIMETER_TAG, CLIENT_INITIALIZED);
         }
     }
 
-    private void tryGetCustomReceiver()
+    void tryGetCustomReceiver(Context context)
     {
-        Application capApp = getActivity().getApplication();
-
-        if(capApp instanceof PerimeterApplicationHooks) {
-            this.fenceReceiverClass = ((PerimeterApplicationHooks) capApp).GetCustomReceiverClass();
-        }
-        else
-        {
-            fenceReceiverClass = SimplePerimeterReceiver.class;
-        }
+        PerimeterApplicationHooks capApp = (PerimeterApplicationHooks) context.getApplicationContext();
+        this.fenceReceiverClass = capApp.GetGeoFenceReceiverClass();
     }
 
     private boolean hasForegroundPermissions() { return (getPermissionState(FOREGROUND_ALIAS) == PermissionState.GRANTED); };
@@ -139,9 +137,23 @@ public final class PerimeterPlugin extends Plugin {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || (getPermissionState(BACKGROUND_ALIAS) == PermissionState.GRANTED);
     };
 
-    private boolean hasLocationPermissions()
+    boolean hasLocationPermissions()
     {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ? hasForegroundPermissions() : hasForegroundPermissions() && hasBackgroundPermissions();
+    }
+
+    boolean hasLocationPermissionsAtBoot(Context context) {
+        boolean hasPermissions = false;
+
+        for (String standardLocationPermission : STANDARD_LOCATION_PERMISSIONS) {
+            hasPermissions = (context.checkSelfPermission(standardLocationPermission) == PackageManager.PERMISSION_GRANTED);
+        }
+
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            hasPermissions = (context.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED);
+        }
+
+        return hasPermissions;
     }
 
     @PluginMethod
@@ -185,15 +197,14 @@ public final class PerimeterPlugin extends Plugin {
     @PermissionCallback
     private void locationPermissionsCallback(PluginCall call) {
         checkPermissions(call);
-        tryInitClient();
+        tryInitClient(getContext(), false);
     }
 
     @PermissionCallback
     private void backgroundPermissionsCallback(PluginCall call) {
-        tryInitClient();
+        tryInitClient(getContext(), false);
     }
 
-    @SuppressLint("MissingPermission")
     @PluginMethod()
     public void addFence(PluginCall call)
     {
@@ -227,7 +238,7 @@ public final class PerimeterPlugin extends Plugin {
             return;
         }
 
-        for (JSONObject fence : activeFences) {
+        for (JSObject fence : activeFences) {
             if(fence.optString("uid").equals(call.getString("uid")) ||
                     (fence.optDouble("lat") == call.getDouble("lat") &&
                     fence.optDouble("lng") == call.getDouble("lng"))) {
@@ -246,17 +257,26 @@ public final class PerimeterPlugin extends Plugin {
                 call.getInt("monitor")
         );
 
-        activeFences.add(call.getData());
-        ArrayList<Geofence> fenceToAdd = new ArrayList<Geofence>();
+        ArrayList<Geofence>fenceToAdd = new ArrayList<>();
         fenceToAdd.add(newFence);
+        activeFences.add(call.getData());
+        addFencesToClient(call, fenceToAdd, getContext());
+    }
 
-        geofencingClient.addGeofences(getGeoFencingRequest(fenceToAdd), getFencePendingIntent())
-                .addOnSuccessListener(v -> call.resolve())
+    @SuppressLint("MissingPermission")
+    private void addFencesToClient(@Nullable PluginCall call, ArrayList<Geofence> fencesToAdd, Context context) {
+
+        geofencingClient.addGeofences(getGeoFencingRequest(fencesToAdd), getFencePendingIntent(context))
+                .addOnSuccessListener(v -> { if( call != null) { call.resolve(); }})
                 .addOnFailureListener(e -> {
                     Log.e(PERIMETER_TAG, e.getLocalizedMessage());
-                    call.reject(e.getLocalizedMessage(), PERIMETER_ERROR.GENERIC_PLATFORM_ERROR.name());
+                    if(call != null) {
+                        call.reject(e.getLocalizedMessage(), PERIMETER_ERROR.GENERIC_PLATFORM_ERROR.name());
+                    }
                 });
-        Log.d(PERIMETER_TAG, "Began monitoring for " + call.getString("uid") + ".");
+        if(call != null) {
+            Log.d(PERIMETER_TAG, "Began monitoring for " + call.getString("uid") + ".");
+        }
     }
 
     @PluginMethod()
@@ -279,25 +299,27 @@ public final class PerimeterPlugin extends Plugin {
         }
 
         String fenceUID = call.getString("fenceUID");
-        boolean foundInActive = false;
+        int foundInActive = -1;
 
-        for(JSObject fence : activeFences)
+        for(int i = 0; i < activeFences.size(); i++)
         {
+            JSObject fence = activeFences.get(i);
+
             if(fenceUID.equals(fence.getString("uid")))
             {
-                foundInActive = true;
+                foundInActive = i;
             }
         }
 
-        if(!foundInActive)
+        if(foundInActive == -1)
         {
             call.reject(ERROR_MESSAGES.get(PERIMETER_ERROR.FENCE_NOT_FOUND), PERIMETER_ERROR.FENCE_NOT_FOUND.name());
-            return;
         }
         else
         {
             ArrayList<String> fenceToRemove = new ArrayList<>();
             fenceToRemove.add(fenceUID);
+            activeFences.remove(foundInActive);
 
             geofencingClient.removeGeofences(fenceToRemove);
             call.resolve();
@@ -329,8 +351,9 @@ public final class PerimeterPlugin extends Plugin {
 
         for(JSObject fence : activeFences)
         {
-            activeFenceUIDs.add(fence.getString("uid"));
-            Log.d(PERIMETER_TAG, fence.getString("uid"));
+            String UID = fence.getString("uid");
+            activeFenceUIDs.add(UID);
+            Log.d(PERIMETER_TAG, UID);
         }
 
         geofencingClient.removeGeofences(activeFenceUIDs);
@@ -340,14 +363,24 @@ public final class PerimeterPlugin extends Plugin {
     }
 
     @PluginMethod()
-    public void getActiveFences(PluginCall call)
-    {
+    public void getActiveFences(PluginCall call) {
+        //TODO Verify this output on the other side.
         JSObject activeFenceDict = new JSObject();
         activeFenceDict.put("fences", activeFences);
         call.resolve(activeFenceDict);
     }
 
-    private Geofence buildNewFence(String identifier, String type, double lat, double lang, float radiusInMeters, long expirationInMillis, int transitionTypes) {
+    private int getConvertedTransitionType(int monitor)
+    {
+        return switch (monitor) {
+            case MONITOR_ENTER -> Geofence.GEOFENCE_TRANSITION_ENTER;
+            case MONITOR_EXIT -> Geofence.GEOFENCE_TRANSITION_EXIT;
+            case MONITOR_BOTH -> Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT;
+            default -> -1;
+        };
+    }
+
+    private Geofence buildNewFence(String identifier, String type, double lat, double lang, float radiusInMeters, long expirationInMillis, int monitor) {
         return new Geofence.Builder()
             // Set the request ID of the geofence. This is a string to identify this
             // geofence.
@@ -356,42 +389,46 @@ public final class PerimeterPlugin extends Plugin {
             // Set circular region of the geofence
             .setCircularRegion(lat, lang, radiusInMeters)
 
+            //TODO Functionality : Loiter delay and expiration should be set by API consumers.
+
             .setNotificationResponsiveness(STANDARD_GEOFENCE_RESPONSIVENESS_MILLISECONDS)
 
             // Set the expiration duration of the geofence.
             .setExpirationDuration(expirationInMillis)
 
-            //TODO Functionality : Loiter delay and expiration should be set by API consumers.
 //            .setLoiteringDelay(STANDARD_GEOFENCE_DWELL_DELAY_MILLISECONDS)
 
             // Set the transition types we're interested in.
-            // We track entry, exit, and dwell(pause) transitions.
-            .setTransitionTypes(transitionTypes)
+            // We track entry and exit transitions.
+            .setTransitionTypes(getConvertedTransitionType(monitor))
 
             .build();
     }
 
-    @SuppressLint("UnspecifiedImmutableFlag")
-    private PendingIntent getFencePendingIntent() {
+    private PendingIntent getFencePendingIntent(Context context) {
 
         if(fencePendingIntent == null)
         {
-            Intent intent = new Intent(getContext(), fenceReceiverClass);
+            Intent intent = new Intent(context, fenceReceiverClass);
 
             try {
                 intent.putExtra(ALL_ACTIVE_FENCES_EXTRA, new JSArray(activeFences.toArray()).toString());
             }
             catch(JSONException e)
             {
-                Log.e(PERIMETER_TAG, ERROR_MESSAGES.get(ANDROID_PLATFORM_EVENT.FAILED_PACK_INTENT.getValue()));
-                EventBus.getDefault().post(new PlatformEvent(ANDROID_PLATFORM_EVENT.FAILED_PACK_INTENT, null));
+                int errorCode = ANDROID_PLATFORM_EVENT.FAILED_PACK_INTENT.getValue();
+                String errorMessage = ERROR_MESSAGES.get(errorCode);
+                Log.e(PERIMETER_TAG, errorMessage);
+                PlatformEvent errorEvent = new PerimeterPlugin.PlatformEvent(errorCode, errorMessage, null);
+                onPlatformEvent(errorEvent);
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+                fencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
             } else {
-                fencePendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                fencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
+
         }
 
         return fencePendingIntent;
@@ -404,15 +441,92 @@ public final class PerimeterPlugin extends Plugin {
         return builder.build();
     }
 
+    void checkForExistingFences(Context context) {
+            SharedPreferences prefs = context.getSharedPreferences("Perimeter", Context.MODE_PRIVATE);
+            String stateString = prefs.getString("activeFencesJSON", "");
+
+            if(!stateString.isEmpty() && activeFences.size() == 0) {
+
+                try {
+
+                    JSArray lastSavedFences = new JSArray(stateString);
+
+                    if(lastSavedFences.length() > 0) {
+
+                        ArrayList<Geofence> fencesToAdd = new ArrayList<>();
+
+                        for(int i = 0; i < lastSavedFences.length(); i++) {
+                            JSObject jsFence = JSObject.fromJSONObject((JSONObject) lastSavedFences.get(i));
+
+                            Geofence newFence = buildNewFence(
+                                    jsFence.getString("uid"),
+                                    jsFence.getString("payload"),
+                                    jsFence.getDouble("lat"),
+                                    jsFence.getDouble("lng"),
+                                    (float) jsFence.getDouble("radius"), // We don't care about narrowing conversion bc radius is at most one or two decimal place.
+                                    Geofence.NEVER_EXPIRE,
+                                    jsFence.getInt("monitor")
+                            );
+
+                            activeFences.add(jsFence);
+                            fencesToAdd.add(newFence);
+                        }
+
+                        addFencesToClient(null, fencesToAdd, context);
+                        int eventCode = ANDROID_PLATFORM_EVENT.FOREGROUND_WITH_EXISTING_FENCES.getValue();
+                        Log.d(PERIMETER_TAG, "Now loading existing fences from geofence store.");
+                        PlatformEvent event = new PerimeterPlugin.PlatformEvent(eventCode, "", lastSavedFences); // Kind of a waste of CPU cycles, but eh.
+                        onPlatformEvent(event);
+
+                    }
+                    else {
+                        Log.d(PERIMETER_TAG, "No orphaned fences.");
+                    }
+
+                } catch (JSONException e) {
+                    int errorCode = ANDROID_PLATFORM_EVENT.FAILED_RESTORING_FENCES.getValue();
+                    String errorMessage = ERROR_MESSAGES.get(errorCode);
+                    Log.e(PERIMETER_TAG, errorMessage);
+                    PlatformEvent errorEvent = new PerimeterPlugin.PlatformEvent(errorCode, errorMessage, null);
+                    onPlatformEvent(errorEvent);
+                };
+            }
+            else {
+                Log.d(PERIMETER_TAG, "No orphaned fences.");
+            }
+    }
+
+    private void saveExistingFences() {
+        SharedPreferences prefs = getActivity().getSharedPreferences("Perimeter", Context.MODE_PRIVATE);
+
+        if(activeFences.size() > 0) {
+            try {
+                prefs.edit()
+                        .putString("activeFencesJSON", new JSArray(activeFences.toArray()).toString())
+                        .apply();
+                Log.d(PERIMETER_TAG, "Updating geofence store before resigning foreground.");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            };
+        }
+        else {
+            prefs.edit()
+                    .clear()
+                    .apply();
+        }
+    }
+
     @Override
     protected void handleOnStart() {
         super.handleOnStart();
+        checkForExistingFences(getContext());
         EventBus.getDefault().register(this);
     }
 
     @Override
     protected void handleOnStop() {
         super.handleOnStop();
+        saveExistingFences();
         EventBus.getDefault().unregister(this);
     }
 
@@ -424,17 +538,17 @@ public final class PerimeterPlugin extends Plugin {
         fenceEventJS.put("time", event.time);
         fenceEventJS.put("transitionType", event.transitionType);
 
-        notifyListeners("FenceEvent", fenceEventJS);
+        notifyListeners("FenceEvent", fenceEventJS, true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPlatformEvent(PlatformEvent event) {
-        JSObject errorEvent = new JSObject();
+        JSObject platformEventJS = new JSObject();
 
-        errorEvent.put("code", event.code);
-        errorEvent.put("message", event.message);
-        errorEvent.put("data", new JSObject());
+        platformEventJS.put("code", event.code);
+        platformEventJS.put("message", event.message);
+        platformEventJS.put("data", event.data);
 
-        notifyListeners("PlatformEvent", errorEvent);
+        notifyListeners("PlatformEvent", platformEventJS, true);
     }
 }

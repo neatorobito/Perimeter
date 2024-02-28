@@ -1,5 +1,8 @@
 package fyi.karm.perimeter;
 
 public interface PerimeterApplicationHooks {
-    Class<? extends PerimeterReceiver> GetCustomReceiverClass();
+    Class<? extends PerimeterReceiver> GetGeoFenceReceiverClass();
+
+
+
 }
