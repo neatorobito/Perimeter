@@ -1,6 +1,6 @@
 # Perimeter
 
-![Device Screenshots](docs/device-shots.png)
+![Device Screenshots](device-shots.png)
 
 This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
 
