@@ -1,6 +1,12 @@
 # Perimeter
 
-This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. Try the sample app Picketfence.
+![Device Screenshots](docs/device-shots.png)
+
+This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
+
+#Sample App
+Try the sample app Picketfence to get up and running fast.
+
 
 ### Installing Perimeter
 

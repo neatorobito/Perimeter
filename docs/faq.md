@@ -16,7 +16,7 @@ No, this plugin is not supported in browser.
 Not at this time.
 
 ### Does Perimeter support customization?
-Yes, Perimeter provides low-level platform specific hooks for Android and iOS. For example, on Android your application can subclass the `PerimeterReceiver` to handle events at the platform level in addition to the classic high-level `Perimeter.addListener("fenceEvent")`callback in JavaScript/Typescript. The plugin also has a `handleEntrance` and `handleExit` override on iOS. Perimeter is intended to be a robust and extendable base for your application to grow on.
+Yes, Perimeter provides low-level platform specific hooks for Android and iOS. For example, on Android your application can subclass `PerimeterReceiver` to handle events at the platform level in addition to the classic high-level `Perimeter.addListener("fenceEvent")`callback in JavaScript/Typescript. The plugin also has a `handleEntrance` and `handleExit` override on iOS. Perimeter is intended to be a robust and extendable base for your application to grow on.
 
 ### How do I convert an address to a set of coordinates?
 This process is called geocoding and there are a number of solutions. You can use OpenStreetMaps, MapBox, MapQuest, Google Maps, or MapKit.Js.
