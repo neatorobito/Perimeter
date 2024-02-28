@@ -4,7 +4,7 @@
 
 This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
 
-#Sample App
+## Sample App
 Try the sample app Picketfence to get up and running fast.
 
 
