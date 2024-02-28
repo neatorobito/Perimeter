@@ -1,4 +1,7 @@
 # Perimeter
+Simple cross platform geofencing for Capacitor
+
+## [Getting Started](docs/getting-started.md)
 
 ## API Reference
 
@@ -17,10 +20,6 @@
 * [Interfaces](#interfaces)
 
 </docgen-index>
-
-Simple cross platform geofencing for Capacitor
-
-## [Getting Started](docs/getting-started.md)
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
