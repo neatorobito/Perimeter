@@ -1,6 +1,6 @@
 # Perimeter
 
-This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
+This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. Try the sample app Picketfence.
 
 ### Installing Perimeter
 
@@ -29,20 +29,51 @@ Then add a description for the following property strings:
 
 #### Android
 
-1. Add the following to your AndroidManifest.xml:
+1. Create a BroadcastReceiver that extends `PerimeterReceiver`.
+```java
+public class SimpleGeofenceReceiver extends PerimeterReceiver {
+    @Override
+    public void onFenceTriggered(Context context, ArrayList<JSObject> triggeredJSFences, long triggerTime, int transitionType) {
 
-```xml
-<uses-feature android:name="android.hardware.location.gps" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    }
 
-<receiver
-    android:name="fyi.karm.perimeter.SimplePerimeterReceiver"
-    android:enabled="true"
-    android:exported="true">
-</receiver>
+    @Override
+    public void onError(Context context, int errorCode, String errorMessage) {
+
+    }
+}
 ```
 
+2. Next, create an Application class that implements `PerimeterApplicationsHooks`.
+```java
+public class MyCustomApp extends Application implements PerimeterApplicationHooks {
+
+    @Override
+    public Class<? extends PerimeterReceiver> GetGeoFenceReceiverClass() {
+        return SimpleGeofenceReceiever.class;
+    }
+
+}
+```
+
+Add the following to your AndroidManifest.xml:
+
+```xml
+    <uses-feature android:name="android.hardware.location.gps" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <receiver
+        android:name=".SimpleGeofenceReceiver"
+        android:enabled="true"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.BOOT_COMPLETED" />
+        </intent-filter>
+    </receiver>
+```
 
 ### Requesting Permissions
 
@@ -142,6 +173,7 @@ To show a push notification on a FenceEvent install the `@capacitor/local-notifi
             body : `Did you ${ fenceEvent.transitionType === TransitionTypes.Enter ? 'enter' : 'exit' } ${ fenceNames.trimEnd() }?`}]})
       })
 ```
+On Android you may also manually create notifications, see `CustomPushGeofenceReceiver` for an example.
 
 ### Other important information
 * Geofences are cleared on boot or app uninstallation on Android.
