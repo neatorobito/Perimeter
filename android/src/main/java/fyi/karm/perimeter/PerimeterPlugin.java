@@ -475,7 +475,7 @@ public final class PerimeterPlugin extends Plugin {
                         addFencesToClient(null, fencesToAdd, context);
                         int eventCode = ANDROID_PLATFORM_EVENT.FOREGROUND_WITH_EXISTING_FENCES.getValue();
                         Log.d(PERIMETER_TAG, "Now loading existing fences from geofence store.");
-                        PlatformEvent event = new PerimeterPlugin.PlatformEvent(eventCode, "", lastSavedFences); // Kind of a waste of CPU cycles, but eh.
+                        PlatformEvent event = new PerimeterPlugin.PlatformEvent(eventCode, "", lastSavedFences); // Kind of a waste of CPU cycles...
                         onPlatformEvent(event);
 
                     }

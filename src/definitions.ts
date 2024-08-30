@@ -42,7 +42,7 @@ export interface PerimeterPlugin {
   /**
    * Add an event listener for geofencing or platform specific error events.
    */
-  addListener( eventName: string, listenerFunc: (event: any) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
+  addListener( eventName: string, listenerFunc: (event: any) => void): Promise<PluginListenerHandle>;
   
   /**
    * Remove all geofencing event listeners

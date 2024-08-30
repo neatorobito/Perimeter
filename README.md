@@ -120,7 +120,7 @@ Stop monitoring for all active fences; stop all background location activity per
 ### addListener(string, ...)
 
 ```typescript
-addListener(eventName: string, listenerFunc: (event: any) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+addListener(eventName: string, listenerFunc: (event: any) => void) => Promise<PluginListenerHandle>
 ```
 
 Add an event listener for geofencing or platform specific error events.
@@ -130,7 +130,7 @@ Add an event listener for geofencing or platform specific error events.
 | **`eventName`**    | <code>string</code>                  |
 | **`listenerFunc`** | <code>(event: any) =&gt; void</code> |
 
-**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
 --------------------
 

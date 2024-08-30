@@ -2,11 +2,7 @@
 
 ![Device Screenshots](device-shots.png)
 
-This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
-
-## Sample App
-Try the sample app Picketfence to get up and running fast.
-
+This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. Try the sample app PicketFence for a starting point.
 
 ### Installing Perimeter
 
@@ -102,8 +98,6 @@ async requestPerms() : Promise<void> {
         this.permStatus = await Perimeter.requestForegroundPermissions();
     }
 
-	// Show your Android specific UI here.
-
     if (this.permStatus.background != "granted") {
         this.permStatus = await Perimeter.requestBackgroundPermissions();
     }
@@ -179,9 +173,14 @@ To show a push notification on a FenceEvent install the `@capacitor/local-notifi
             body : `Did you ${ fenceEvent.transitionType === TransitionTypes.Enter ? 'enter' : 'exit' } ${ fenceNames.trimEnd() }?`}]})
       })
 ```
-On Android you may also manually create notifications, see `CustomPushGeofenceReceiver` for an example.
+
+Keep in mind that iOS and Android use different background processing models. iOS wakes your entire app from the background so the main process can trigger the LocalNotifications plugin. On Android however, you'll need to use a Broadcast Receiver if you want to show notifications while the app is closed. For an example, replace `SimpleGeofenceReceiever` with `CustomPushGeofenceReceiver` in the sample PicketFence app. 
+
+If you need to do additional background processing on iOS in Swift, add your code to the following method in the KarmPerimeter under DevelopmentPods in Xcode.
+`func handleFenceEvent(triggeredRegion : CLCircularRegion, eventType : Constants.Perimeter.TransitionType)`
+
 
 ### Other important information
-* Geofences are cleared on boot or app uninstallation on Android.
+* Geofences are cleared after a reboot on Android. Perimeter will try to automatically handle this by reloading fences from a saved store.
 
 Copyright Mark Raymond Jr., All Rights Reserved. 2022
