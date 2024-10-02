@@ -2,6 +2,7 @@
 Simple cross platform geofencing for Capacitor
 
 ## [Getting Started](docs/getting-started.md)
+## [Build Sample App] [https://github.com/neatorobito/PicketFence]
 
 ## API Reference
 

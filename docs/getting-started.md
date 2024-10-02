@@ -4,35 +4,11 @@
 
 This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
 
-## Sample App
-
-1. Clone the sample app and this plugin
-```bash
-git clone https://github.com/neatorobito/PicketFence
-git clone https://github.com/neatorobito/Perimeter
-```
-
-2. Build and install the plugin locally
-```bash
-cd Perimeter
-npm run build
-
-cd ../PicketFence
-npm install ../Perimeter
-```
-
-3. Build and run the sample app
-```bash
-npm install
-npm run build
-npx cap sync
-npx cap open ios #or android
-```
-
-## Existing App
+## Getting Started
 ```bash
 npm install @karm/perimeter
 npx cap sync
+npx cap open ios #or android
 ```
 
 ### Declaring capabilities
