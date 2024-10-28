@@ -6,7 +6,6 @@ This API provides a simple, straightforward, and robust way to do geofencing on 
 
 ## Getting Started
 ```bash
-npm install @karm/perimeter
 npx cap sync
 npx cap open ios #or android
 ```
