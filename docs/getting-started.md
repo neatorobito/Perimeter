@@ -182,4 +182,4 @@ If you need to do additional background processing on iOS in Swift, add your cod
 ### Other important information
 * Geofences are cleared after a reboot on Android. Perimeter will try to automatically handle this by reloading fences from a saved store.
 
-Copyright Mark Raymond Jr., All Rights Reserved. 2022
+Copyright Mark Raymond Jr., All Rights Reserved. 2024
