@@ -1,5 +1,8 @@
 # Perimeter
+
 ![Ionic](https://img.shields.io/badge/Ionic-%233880FF.svg?style=for-the-badge&logo=Ionic&logoColor=white)
+
+
 Perimeter provides simple cross platform geofencing for hybrid apps that leverage Ionic Capacitor.
 
 Please see the *[Quick Start Guide](docs/getting-started.md)* to get Perimeter integrated in your app. Unless otherwise specified, all methods are available on the latest versions iOS and Android.

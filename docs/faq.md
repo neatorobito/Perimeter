@@ -20,3 +20,5 @@ Yes, Perimeter provides low-level platform specific hooks for Android and iOS. F
 
 ### How do I convert an address to a set of coordinates?
 This process is called geocoding and there are a number of solutions. You can use OpenStreetMaps, MapBox, MapQuest, Google Maps, or MapKit.Js.
+
+Copyright Mark Raymond Jr., All Rights Reserved. 2026
