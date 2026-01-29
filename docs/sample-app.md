@@ -1,1 +1,0 @@
-# PicketFence Sample App

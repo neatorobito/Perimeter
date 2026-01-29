@@ -1,24 +1,29 @@
 # Perimeter
-Simple cross platform geofencing for Capacitor
+![Ionic](https://img.shields.io/badge/Ionic-%233880FF.svg?style=for-the-badge&logo=Ionic&logoColor=white)
+Perimeter provides simple cross platform geofencing for hybrid apps that leverage Ionic Capacitor.
 
-## [Getting Started](docs/getting-started.md)
-## [Build Sample App] [https://github.com/neatorobito/PicketFence]
+Please see the *[Quick Start Guide](docs/getting-started.md)* to get Perimeter integrated in your app. Unless otherwise specified, all methods are available on the latest versions iOS and Android.
 
 ## API Reference
 
 <docgen-index>
 
-* [`checkPermissions()`](#checkpermissions)
-* [`requestPermissions()`](#requestpermissions)
-* [`requestForegroundPermissions()`](#requestforegroundpermissions)
-* [`requestBackgroundPermissions()`](#requestbackgroundpermissions)
-* [`addFence(...)`](#addfence)
-* [`removeFence(...)`](#removefence)
-* [`removeAllFences()`](#removeallfences)
-* [`addListener(string, ...)`](#addlistenerstring)
-* [`removeAllListeners()`](#removealllisteners)
-* [`getActiveFences()`](#getactivefences)
-* [Interfaces](#interfaces)
+- [Perimeter](#perimeter)
+  - [API Reference](#api-reference)
+    - [checkPermissions()](#checkpermissions)
+    - [requestPermissions()](#requestpermissions)
+    - [requestForegroundPermissions()](#requestforegroundpermissions)
+    - [requestBackgroundPermissions()](#requestbackgroundpermissions)
+    - [addFence(...)](#addfence)
+    - [removeFence(...)](#removefence)
+    - [removeAllFences()](#removeallfences)
+    - [addListener(string, ...)](#addlistenerstring-)
+    - [removeAllListeners()](#removealllisteners)
+    - [getActiveFences()](#getactivefences)
+    - [Interfaces](#interfaces)
+      - [PluginListenerHandle](#pluginlistenerhandle)
+      - [Array](#array)
+      - [ConcatArray](#concatarray)
 
 </docgen-index>
 
@@ -31,7 +36,7 @@ Simple cross platform geofencing for Capacitor
 checkPermissions() => Promise<LocationPermissionStatus>
 ```
 
-Get the current foreground and background location permissions status.
+usage: get the current foreground and background location permissions status
 
 **Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
@@ -44,7 +49,9 @@ Get the current foreground and background location permissions status.
 requestPermissions() => Promise<LocationPermissionStatus>
 ```
 
-Prompt the user for access to their precise location at all times on iOS 12 or Android 9 and earlier. Attempting to use this method on a later release will fail and display an console error.
+usage: prompt the user for access to their precise location at all times
+
+availability: iOS 12 or Android 9 and earlier
 
 **Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
@@ -57,7 +64,9 @@ Prompt the user for access to their precise location at all times on iOS 12 or A
 requestForegroundPermissions() => Promise<LocationPermissionStatus>
 ```
 
-Prompt the user for access to their location while the app is running in the foreground. For use on iOS 13 or on Android 10 and later.
+usage: prompt the user for access to their location while the app is running in the foreground
+
+availability: iOS 13 or Android 10 and later
 
 **Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
@@ -70,7 +79,9 @@ Prompt the user for access to their location while the app is running in the for
 requestBackgroundPermissions() => Promise<LocationPermissionStatus>
 ```
 
-Prompt the user for access to their location while the app is running in the background. For use on iOS 13 or on Android 10 and later.
+usage: prompt the user for access to their location while the app is running in the background
+
+availability: iOS 13 or Android 10 and later
 
 **Returns:** <code>Promise&lt;LocationPermissionStatus&gt;</code>
 
@@ -83,7 +94,9 @@ Prompt the user for access to their location while the app is running in the bac
 addFence(newFence: Fence) => Promise<void>
 ```
 
-Request that system monitor a region defined by the newFence object. When the user enters or exits your fence, you will receive a fenceEvent.
+usage: request that the system monitor a region defined by the `newFence` object
+
+effect: when the user enters or exits the region, the sdk generates a `fenceEvent`
 
 | Param          | Type               |
 | -------------- | ------------------ |
@@ -98,7 +111,9 @@ Request that system monitor a region defined by the newFence object. When the us
 removeFence(options: { fenceUID: string; }) => Promise<void>
 ```
 
-Stop monitoring for a fence associated with the specified identifier. If the fence cannot be found, this method will fail and display an console error.
+usage: stop monitoring for a fence associated with the specified identifier
+
+note: if the fence cannot be found, this method will fail and display a console error
 
 | Param         | Type                               |
 | ------------- | ---------------------------------- |
@@ -113,7 +128,7 @@ Stop monitoring for a fence associated with the specified identifier. If the fen
 removeAllFences() => Promise<void>
 ```
 
-Stop monitoring for all active fences; stop all background location activity performed by this module.
+usage: stop monitoring for all active fences; stop all background location activity performed by this module
 
 --------------------
 
@@ -124,7 +139,7 @@ Stop monitoring for all active fences; stop all background location activity per
 addListener(eventName: string, listenerFunc: (event: any) => void) => Promise<PluginListenerHandle>
 ```
 
-Add an event listener for geofencing or platform specific error events.
+usage: add an event listener for geofencing or platform specific error events
 
 | Param              | Type                                 |
 | ------------------ | ------------------------------------ |
@@ -142,7 +157,7 @@ Add an event listener for geofencing or platform specific error events.
 removeAllListeners() => Promise<void>
 ```
 
-Remove all geofencing event listeners
+usage: remove all geofencing event listeners
 
 --------------------
 
@@ -153,7 +168,7 @@ Remove all geofencing event listeners
 getActiveFences() => Promise<{ data: Array<Fence>; }>
 ```
 
-Returns a list of all regions currently being monitored.
+usage: returns a list of all regions currently being monitored.
 
 **Returns:** <code>Promise&lt;{ data: Fence[]; }&gt;</code>
 
@@ -222,4 +237,4 @@ Returns a list of all regions currently being monitored.
 
 </docgen-api>
 
-Copyright Mark Raymond Jr., All Rights Reserved. 2024
+Copyright Mark Raymond Jr., All Rights Reserved. 2026

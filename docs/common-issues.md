@@ -1,14 +1,14 @@
 # Common Issues
 
-### Geofences are not triggering.
-Both:
-1. Force close your app
-2. Restart the phone
-3. Create a geofence
+Below is a list of common issues along with troubleshooting steps for each platform.
 
-Android: 
-* Make sure Google Play is up to date
-* Open Google Maps to manually trigger a location pull.
-
-iOS
-* Open Apple Maps to manually trigger a location pull.
+- I've followed the instructions in the getting started section and yet the geofence I created is not triggering an event.
+  - Android: 
+    - Make sure Google Play is up to date
+    - Open Google Maps to manually trigger a location pull.
+  - iOS
+    - Open Apple Maps to manually trigger a location pull.
+  - Both:
+    - Force close your app.
+    - Restart the phone.
+    - Try recreating the geofence.
