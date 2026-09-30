@@ -2,7 +2,7 @@
 
 ![Device Screenshots](device-shots.png)
 
-This API provides a simple, straightforward, and robust way to do geofencing on iOS and Android. 
+This library provides an API that offers a straightforward way to do geofencing on iOS and Android. 
 
 ## Getting Started
 
