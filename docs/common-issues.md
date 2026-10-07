@@ -12,5 +12,3 @@ Below is a list of common issues along with troubleshooting steps for each platf
     - Force close your app.
     - Restart the phone.
     - Try recreating the geofence.
-
-Copyright Mark Raymond Jr., All Rights Reserved. 2026
