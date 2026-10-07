@@ -239,5 +239,3 @@ usage: returns a list of all regions currently being monitored.
 | **slice** | (start?: number \| undefined, end?: number \| undefined) =&gt; T[] |
 
 </docgen-api>
-
-Copyright Mark Raymond Jr., All Rights Reserved. 2026
